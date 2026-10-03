@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+// To edit the donation steps, change src/data/donation-steps.json
+import steps from '../data/donation-steps.json';
+
+// Edit the impact highlights here.
+const impact = [
+  { amount: '$10', text: 'provides supplies for one care package.' },
+  { amount: '$25', text: 'feeds a family for a weekend.' },
+  { amount: '$50', text: 'funds materials for an entire service day.' },
+];
+---
+
+<BaseLayout title="Donate" description="Support our mission and help us serve our community.">
+  <section class="page-header">
+    <div class="container narrow">
+      <p class="eyebrow">Donate</p>
+      <h1 class="page-title">Help us do more good</h1>
+      <p class="page-intro">Your generosity turns compassion into action.</p>
+    </div>
+  </section>
+
+  <section class="section section-tight" aria-labelledby="why-heading">
+    <div class="container why-grid">
+      <div>
+        <h2 id="why-heading" class="section-title">Why donate?</h2>
+        <p class="lead">
+          Every project we run — from food drives to care packages — is powered by people like you.
+        </p>
+        <p>
+          We are entirely volunteer-run, which means your contribution goes directly to the
+          communities we serve. Donations help us buy supplies, cover transportation to service
+          sites, and expand our programs to reach more neighbors in need.
+        </p>
+      </div>
+      <ul class="impact-list">
+        {
+          impact.map((item) => (
+            <li class="impact-card">
+              <span class="impact-amount">{item.amount}</span>
+              <span class="impact-text">{item.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section-alt" aria-labelledby="how-heading">
+    <div class="container narrow">
+      <p class="eyebrow">Step by step</p>
+      <h2 id="how-heading" class="section-title">How to donate</h2>
+      <ol class="steps">
+        {
+          steps.map((step, i) => (
+            <li class="step">
+              <span class="step-num" aria-hidden="true">{i + 1}</span>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+</BaseLayout>

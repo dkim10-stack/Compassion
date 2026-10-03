@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import DailyQuote from '../components/DailyQuote.astro';
+
+// Edit the "Who we are" content here.
+const pillars = [
+  {
+    title: 'Service',
+    text: 'We show up — at shelters, food pantries, and schools — wherever a helping hand is needed.',
+  },
+  {
+    title: 'Empathy',
+    text: 'We listen first, seeking to understand the people and stories behind every need.',
+  },
+  {
+    title: 'Community',
+    text: 'We believe lasting change happens together, one relationship at a time.',
+  },
+];
+---
+
+<BaseLayout>
+  <Hero />
+  <DailyQuote />
+
+  <section class="section about" aria-labelledby="about-heading">
+    <div class="container about-grid">
+      <div class="about-heading">
+        <p class="eyebrow">Who we are</p>
+        <h2 id="about-heading" class="section-title">
+          A community built on <em>kindness</em>.
+        </h2>
+      </div>
+      <div class="about-body">
+        <p class="lead">
+          We are a group of students and neighbors who believe that compassion is something you
+          practice, not just something you feel.
+        </p>
+        <p>
+          Founded on the idea that small acts add up, our club organizes service projects,
+          fundraisers, and conversations that bring people together. Whether you have an hour a
+          month or an hour a day, there is a place for you here.
+        </p>
+      </div>
+    </div>
+
+    <div class="container">
+      <ol class="pillars">
+        {
+          pillars.map((p, i) => (
+            <li class="pillar">
+              <span class="pillar-num">{String(i + 1).padStart(2, '0')}</span>
+              <h3>{p.title}</h3>
+              <p>{p.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+</BaseLayout>

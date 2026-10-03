@@ -1,0 +1,23 @@
+---
+import { site, nav } from '../config/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div>
+      <p class="footer-name">{site.name}</p>
+      <p class="footer-motto">{site.motto}</p>
+    </div>
+    <nav aria-label="Footer">
+      <ul class="footer-links">
+        {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+  <div class="container footer-bottom">
+    <p>© {year} {site.name}</p>
+    <a href={`mailto:${site.email}`}>{site.email}</a>
+  </div>
+</footer>

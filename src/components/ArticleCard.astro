@@ -1,0 +1,26 @@
+---
+import { formatDate } from '../utils/formatDate';
+
+interface Props {
+  title: string;
+  date: Date;
+  href: string;
+  summary?: string;
+  author?: string;
+}
+
+const { title, date, href, summary, author } = Astro.props;
+---
+
+<article class="article-card">
+  <div class="article-meta">
+    <time datetime={date.toISOString()}>{formatDate(date)}</time>
+    {author && <span class="dot" aria-hidden="true">·</span>}
+    {author && <span>{author}</span>}
+  </div>
+  <h2 class="article-title"><a href={href}>{title}</a></h2>
+  {summary && <p class="article-summary">{summary}</p>}
+  <a href={href} class="btn btn-small" aria-label={`Read full article: ${title}`}>
+    Read full article <span aria-hidden="true">→</span>
+  </a>
+</article>

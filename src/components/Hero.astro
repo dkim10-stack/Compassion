@@ -1,0 +1,24 @@
+---
+import { site } from '../config/site';
+---
+
+<section class="hero">
+  <div class="container hero-inner">
+    {
+      site.logo ? (
+        <img src={site.logo} alt={`${site.name} logo`} class="hero-logo" />
+      ) : (
+        <div class="logo-placeholder" role="img" aria-label="Logo placeholder">
+          <span>Your Logo</span>
+        </div>
+      )
+    }
+    <h1 class="hero-title">{site.name}</h1>
+    <div class="hero-divider" aria-hidden="true"></div>
+    <p class="hero-motto">{site.motto}</p>
+    <div class="hero-actions">
+      <a href="/articles" class="btn btn-primary">Read our stories</a>
+      <a href="/donate" class="btn btn-ghost">Support us</a>
+    </div>
+  </div>
+</section>

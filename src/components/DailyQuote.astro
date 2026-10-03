@@ -1,0 +1,17 @@
+---
+// To change the quote, edit src/data/daily-quote.json
+import quote from '../data/daily-quote.json';
+---
+
+<section class="section quote-section" aria-labelledby="quote-heading">
+  <div class="container narrow">
+    <p id="quote-heading" class="eyebrow">Daily Quote</p>
+    <figure class="quote">
+      <span class="quote-mark" aria-hidden="true">“</span>
+      <blockquote>
+        <p>{quote.text}</p>
+      </blockquote>
+      {quote.author && <figcaption>— {quote.author}</figcaption>}
+    </figure>
+  </div>
+</section>

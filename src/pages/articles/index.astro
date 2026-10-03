@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+
+const articles = (await getCollection('articles')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<BaseLayout title="Articles" description="Stories, reflections, and updates from our club.">
+  <section class="page-header">
+    <div class="container narrow">
+      <p class="eyebrow">Articles</p>
+      <h1 class="page-title">Stories &amp; Reflections</h1>
+      <p class="page-intro">Updates, event recaps, and thoughts written by our members.</p>
+    </div>
+  </section>
+
+  <section class="section section-tight">
+    <div class="container narrow">
+      {
+        articles.length === 0 ? (
+          <p class="empty">No articles yet — check back soon!</p>
+        ) : (
+          <div class="article-list">
+            {articles.map((a) => (
+              <ArticleCard
+                title={a.data.title}
+                date={a.data.date}
+                summary={a.data.summary}
+                author={a.data.author}
+                href={`/articles/${a.id}`}
+              />
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
