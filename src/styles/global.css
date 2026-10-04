@@ -683,9 +683,8 @@ a {
 
 /* ── Footer ────────────────────────────────────────────────── */
 .site-footer {
-  background: var(--color-alt);
-  border-top: 1px solid var(--color-border);
-  color: var(--color-text);
+  background: var(--color-ink);
+  color: rgb(255 255 255 / 0.75);
   padding: 3.5rem 0 1.5rem;
   font-size: 0.95rem;
 }
@@ -696,14 +695,14 @@ a {
   gap: 2rem;
   flex-wrap: wrap;
   padding-bottom: 2rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgb(255 255 255 / 0.12);
 }
 
 .footer-name {
   font-family: var(--font-display);
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: #fff;
   margin-bottom: 0.25rem;
 }
 
@@ -724,13 +723,13 @@ a {
 
 .footer-links a,
 .footer-bottom a {
-  color: var(--color-text);
+  color: rgb(255 255 255 / 0.75);
   text-decoration: none;
 }
 
 .footer-links a:hover,
 .footer-bottom a:hover {
-  color: var(--color-brand);
+  color: var(--color-sky);
 }
 
 .footer-bottom {
