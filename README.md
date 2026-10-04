@@ -1,4 +1,4 @@
-# Compassion — Organization Website
+# Compassion Review — Website
 
 A simple, responsive website built with [Astro](https://astro.build). Three pages: **Home**, **Articles**, and **Donate**.
 
@@ -21,7 +21,7 @@ The `dist/` folder is plain HTML/CSS and can be hosted anywhere (Netlify, Vercel
 ├── package.json
 ├── tsconfig.json
 ├── public/
-│   └── favicon.svg             Put your logo image here too (e.g. logo.png)
+│   └── logo.png                Logo (also used as the browser-tab icon)
 └── src/
     ├── config/site.ts          ✏️ Name, motto, logo, email, nav links
     ├── data/
