@@ -2,22 +2,23 @@
    Design tokens — change colors and fonts here.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --color-bg: #faf6ef;
+  --color-bg: #f8fbfe;
   --color-surface: #ffffff;
-  --color-alt: #f2ebdf;
-  --color-ink: #1f2a44;
-  --color-text: #3b4254;
-  --color-muted: #6b7083;
-  --color-accent: #c2603d;
-  --color-accent-dark: #a24c2d;
-  --color-gold: #e8b98a;
-  --color-border: #e6dccb;
+  --color-alt: #eef6fd;
+  --color-ink: #12294a;
+  --color-text: #3a4a60;
+  --color-muted: #66768c;
+  --color-brand: #0060b9; /* logo blue */
+  --color-brand-dark: #004e96;
+  --color-sky: #5ab4ec;
+  --color-sky-soft: #d9ecfa;
+  --color-border: #dce8f3;
 
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --radius: 14px;
-  --shadow: 0 1px 2px rgb(31 42 68 / 0.04), 0 8px 24px rgb(31 42 68 / 0.06);
+  --shadow: 0 1px 2px rgb(18 41 74 / 0.04), 0 8px 24px rgb(18 41 74 / 0.06);
   --header-h: 72px;
 }
 
@@ -70,11 +71,11 @@ p {
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--color-brand);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-brand);
   outline-offset: 3px;
 }
 
@@ -120,7 +121,7 @@ a {
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-brand);
   margin-bottom: 0.75rem;
 }
 
@@ -129,8 +130,9 @@ a {
 }
 
 .section-title em {
-  color: var(--color-accent);
-  font-style: italic;
+  color: var(--color-brand);
+  font-style: normal;
+  font-weight: 700;
 }
 
 .lead {
@@ -158,20 +160,19 @@ a {
 }
 
 .btn-primary {
-  background: var(--color-accent);
+  background: var(--color-brand);
   color: #fff;
 }
 .btn-primary:hover {
-  background: var(--color-accent-dark);
+  background: var(--color-brand-dark);
 }
 
 .btn-ghost {
-  border-color: rgb(255 255 255 / 0.5);
-  color: #fff;
+  border-color: var(--color-brand);
+  color: var(--color-brand);
 }
 .btn-ghost:hover {
-  background: rgb(255 255 255 / 0.1);
-  border-color: #fff;
+  background: var(--color-sky-soft);
 }
 
 .btn-small {
@@ -182,7 +183,8 @@ a {
   color: var(--color-ink);
 }
 .btn-small:hover {
-  background: var(--color-ink);
+  background: var(--color-brand);
+  border-color: var(--color-brand);
   color: #fff;
 }
 
@@ -191,7 +193,7 @@ a {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgb(250 246 239 / 0.92);
+  background: rgb(248 251 254 / 0.92);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-border);
@@ -218,8 +220,8 @@ a {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-ink);
-  color: var(--color-gold);
+  background: var(--color-brand);
+  color: #fff;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.4rem;
@@ -263,7 +265,7 @@ a {
 }
 
 .nav-link.active {
-  background: var(--color-ink);
+  background: var(--color-brand);
   color: #fff;
 }
 
@@ -295,10 +297,11 @@ a {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 20% 0%, rgb(194 96 61 / 0.35), transparent 55%),
-    radial-gradient(ellipse at 90% 100%, rgb(232 185 138 / 0.25), transparent 50%),
-    var(--color-ink);
-  color: #fff;
+    radial-gradient(ellipse at 15% 0%, rgb(90 180 236 / 0.22), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgb(0 96 185 / 0.1), transparent 50%),
+    linear-gradient(180deg, #f2f8fe, var(--color-bg));
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-border);
   text-align: center;
   padding: 6rem 0 6.5rem;
 }
@@ -313,18 +316,18 @@ a {
   width: 128px;
   height: 128px;
   border-radius: 50%;
-  border: 2px dashed rgb(232 185 138 / 0.7);
+  border: 2px dashed var(--color-sky);
   display: grid;
   place-items: center;
   margin-bottom: 2rem;
-  background: rgb(255 255 255 / 0.04);
+  background: rgb(255 255 255 / 0.6);
 }
 
 .logo-placeholder span {
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--color-sky);
 }
 
 .hero-logo {
@@ -335,7 +338,7 @@ a {
 }
 
 .hero-title {
-  color: #fff;
+  color: var(--color-ink);
   font-size: clamp(3.25rem, 11vw, 7rem);
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -346,7 +349,7 @@ a {
 .hero-divider {
   width: 64px;
   height: 2px;
-  background: var(--color-gold);
+  background: var(--color-sky);
   margin-bottom: 1.5rem;
 }
 
@@ -354,7 +357,7 @@ a {
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(1.35rem, 3.2vw, 2rem);
-  color: rgb(255 255 255 / 0.85);
+  color: var(--color-muted);
   line-height: 1.4;
   max-width: 34ch;
   margin-bottom: 2.5rem;
@@ -384,7 +387,7 @@ a {
   font-family: var(--font-display);
   font-size: 6rem;
   line-height: 0.6;
-  color: var(--color-gold);
+  color: var(--color-sky);
   height: 2.5rem;
 }
 
@@ -424,7 +427,7 @@ a {
 }
 
 .about-body {
-  border-left: 2px solid var(--color-gold);
+  border-left: 2px solid var(--color-sky);
   padding-left: 2rem;
 }
 
@@ -450,7 +453,7 @@ a {
   font-family: var(--font-display);
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-brand);
   line-height: 1;
   margin-bottom: 1rem;
 }
@@ -525,7 +528,7 @@ a {
 .article-title a {
   color: inherit;
   text-decoration: none;
-  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+  background-image: linear-gradient(var(--color-sky), var(--color-sky));
   background-size: 0 2px;
   background-position: 0 100%;
   background-repeat: no-repeat;
@@ -574,7 +577,7 @@ a {
 .prose blockquote {
   margin: 2rem 0;
   padding: 0.25rem 0 0.25rem 1.5rem;
-  border-left: 3px solid var(--color-gold);
+  border-left: 3px solid var(--color-sky);
   font-family: var(--font-display);
   font-style: italic;
   font-size: 1.5rem;
@@ -620,7 +623,7 @@ a {
   font-family: var(--font-display);
   font-size: 2.25rem;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-brand);
   line-height: 1;
 }
 
@@ -661,8 +664,8 @@ a {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-ink);
-  color: var(--color-gold);
+  background: var(--color-brand);
+  color: #fff;
   font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 700;
@@ -680,8 +683,9 @@ a {
 
 /* ── Footer ────────────────────────────────────────────────── */
 .site-footer {
-  background: var(--color-ink);
-  color: rgb(255 255 255 / 0.75);
+  background: var(--color-alt);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
   padding: 3.5rem 0 1.5rem;
   font-size: 0.95rem;
 }
@@ -692,14 +696,14 @@ a {
   gap: 2rem;
   flex-wrap: wrap;
   padding-bottom: 2rem;
-  border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .footer-name {
   font-family: var(--font-display);
   font-size: 1.75rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-ink);
   margin-bottom: 0.25rem;
 }
 
@@ -720,13 +724,13 @@ a {
 
 .footer-links a,
 .footer-bottom a {
-  color: rgb(255 255 255 / 0.75);
+  color: var(--color-text);
   text-decoration: none;
 }
 
 .footer-links a:hover,
 .footer-bottom a:hover {
-  color: var(--color-gold);
+  color: var(--color-brand);
 }
 
 .footer-bottom {
@@ -803,7 +807,7 @@ a {
     right: 0;
     background: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 12px 24px rgb(31 42 68 / 0.08);
+    box-shadow: 0 12px 24px rgb(18 41 74 / 0.08);
     display: none;
   }
 
