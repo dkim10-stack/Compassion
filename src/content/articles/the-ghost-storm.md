@@ -1,6 +1,6 @@
 ---
 title: "The Ghost Storm: How Tropical Storm Pilandok Devastated the Philippines Without Ever Touching It"
-date: 2026-10-04
+date: 2026-09-12
 author: Compassion Review
 summary: Pilandok never came close to the Philippines and never raised a single wind signal, yet by enhancing the southwest monsoon it deepened weeks of flooding and losses across the country.
 ---
