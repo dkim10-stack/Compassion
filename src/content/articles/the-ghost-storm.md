@@ -1,5 +1,5 @@
 ---
-title: Welcome to Compassion
+title: "The Ghost Storm: How Tropical Storm Pilandok Devastated the Philippines Without Ever Touching It"
 date: 2026-09-01
 author: The Compassion Team
 summary: Who we are, why we started, and what we hope to build together this year.
