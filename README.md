@@ -47,7 +47,7 @@ The `dist/` folder is plain HTML/CSS and can be hosted anywhere (Netlify, Vercel
 
 ## Common edits
 
-**Change the daily quote** — edit `src/data/daily-quote.json`:
+**Change the Daily Message of Hope** — edit `src/data/daily-quote.json`:
 
 ```json
 {
