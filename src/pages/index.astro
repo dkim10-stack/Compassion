@@ -2,22 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import DailyQuote from '../components/DailyQuote.astro';
-
-// Edit the "Who we are" content here.
-const pillars = [
-  {
-    title: 'Service',
-    text: 'We show up — at shelters, food pantries, and schools — wherever a helping hand is needed.',
-  },
-  {
-    title: 'Empathy',
-    text: 'We listen first, seeking to understand the people and stories behind every need.',
-  },
-  {
-    title: 'Community',
-    text: 'We believe lasting change happens together, one relationship at a time.',
-  },
-];
 ---
 
 <BaseLayout>
@@ -47,20 +31,6 @@ const pillars = [
           awareness into further tangible impact.
         </p>
       </div>
-    </div>
-
-    <div class="container">
-      <ol class="pillars">
-        {
-          pillars.map((p, i) => (
-            <li class="pillar">
-              <span class="pillar-num">{String(i + 1).padStart(2, '0')}</span>
-              <h3>{p.title}</h3>
-              <p>{p.text}</p>
-            </li>
-          ))
-        }
-      </ol>
     </div>
   </section>
 </BaseLayout>
