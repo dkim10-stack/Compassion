@@ -16,7 +16,7 @@
 
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-title: 'DM Serif Display', Georgia, 'Times New Roman', serif; /* organization name */
-  --font-motto: 'Libre Caslon Text', Georgia, 'Times New Roman', serif; /* motto (italic) */
+  --font-motto: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; /* motto (italic) */
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --radius: 14px;
@@ -359,7 +359,7 @@ a {
 .hero-motto {
   font-family: var(--font-motto);
   font-style: italic;
-  font-size: clamp(1.35rem, 3.2vw, 2rem);
+  font-size: clamp(1.2rem, 2.8vw, 1.65rem);
   color: var(--color-muted);
   line-height: 1.4;
   max-width: 34ch;
@@ -712,7 +712,7 @@ a {
 .footer-motto {
   font-family: var(--font-motto);
   font-style: italic;
-  font-size: 1.15rem;
+  font-size: 1rem;
   margin: 0;
 }
 
