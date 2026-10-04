@@ -15,6 +15,8 @@
   --color-border: #dce8f3;
 
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-title: 'DM Serif Display', Georgia, 'Times New Roman', serif; /* organization name */
+  --font-motto: 'Libre Caslon Display', Georgia, 'Times New Roman', serif; /* motto (italic) */
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --radius: 14px;
@@ -234,9 +236,9 @@ a {
 }
 
 .brand-name {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 400; /* DM Serif Display's only weight — already bold */
   letter-spacing: 0.01em;
 }
 
@@ -338,9 +340,10 @@ a {
 }
 
 .hero-title {
+  font-family: var(--font-title);
   color: var(--color-ink);
   font-size: clamp(3.25rem, 11vw, 7rem);
-  font-weight: 700;
+  font-weight: 400; /* DM Serif Display's only weight — already bold */
   letter-spacing: -0.01em;
   line-height: 1;
   margin-bottom: 1.5rem;
@@ -354,7 +357,7 @@ a {
 }
 
 .hero-motto {
-  font-family: var(--font-display);
+  font-family: var(--font-motto);
   font-style: italic;
   font-size: clamp(1.35rem, 3.2vw, 2rem);
   color: var(--color-muted);
@@ -699,15 +702,15 @@ a {
 }
 
 .footer-name {
-  font-family: var(--font-display);
+  font-family: var(--font-title);
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 400;
   color: #fff;
   margin-bottom: 0.25rem;
 }
 
 .footer-motto {
-  font-family: var(--font-display);
+  font-family: var(--font-motto);
   font-style: italic;
   font-size: 1.15rem;
   margin: 0;
