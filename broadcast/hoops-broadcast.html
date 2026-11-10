@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<!--
+  HOOPSCAST — High School Basketball Broadcast Graphics (single-file, 1920x1080)
+
+  HOW TO USE
+  1) OVERLAY (what viewers see): open this file with no hash, or with #overlay.
+       OBS: Add "Browser" source -> check "Local file" -> pick this file -> Width 1920, Height 1080.
+  2) CONTROL PANEL (operator switchboard): open this file with #control appended.
+       Best in OBS: Docks -> Custom Browser Docks -> URL: file:///C:/path/to/hoops-broadcast.html#control
+       (A custom dock shares OBS's browser storage with the Browser source, so they sync instantly.)
+       Alternative: open BOTH views as two tabs/windows of the same desktop browser (Chrome/Edge)
+       and capture the overlay window in OBS.
+  The two views sync in real time through the browser's LocalStorage API.
+  SPACEBAR starts/stops the game clock while the control panel has focus.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HoopsCast Broadcast Graphics</title>
+<style>
+/* =====================================================================
+   SHARED TOKENS
+   ===================================================================== */
+:root{
+  --home:#1e6bff; --home-rgb:30,107,255; --home-ink:#ffffff;
+  --away:#e0262f; --away-rgb:224,38,47;  --away-ink:#ffffff;
+  --accent:#ffd400; --accent-rgb:255,212,0;
+  --glass:rgba(8,12,22,.74);
+  --glass-2:rgba(14,20,34,.86);
+  --line:rgba(255,255,255,.10);
+  --display:Impact,"Haettenschweiler","Arial Narrow Bold","Arial Black",sans-serif;
+  --heavy:"Arial Black","Segoe UI Black","Helvetica Neue",Arial,sans-serif;
+  --ui:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --ease-out:cubic-bezier(.16,.9,.22,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+html.mode-overlay,html.mode-overlay body{background:transparent;overflow:hidden}
+html.mode-control body{background:#070a12}
+html.mode-overlay #control{display:none}
+html.mode-control #overlay{display:none}
+
+/* =====================================================================
+   OVERLAY VIEW — 1920x1080 STAGE
+   ===================================================================== */
+#overlay{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+.stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;color:#fff;font-family:var(--heavy)}
+
+/* Team logo (image or fallback monogram) */
+.logo{position:relative;display:grid;place-items:center;flex:0 0 auto;border-radius:50%}
+.logo img{width:100%;height:100%;object-fit:contain;display:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.logo.has-img img{display:block}
+.logo .mono{position:absolute;inset:0;display:grid;place-items:center;border-radius:50%;font-family:var(--display);letter-spacing:1px;
+  background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.35),transparent 55%),var(--c);color:var(--c-ink);
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.25)}
+.logo.has-img .mono{display:none}
+.t-home{--c:var(--home);--c-rgb:var(--home-rgb);--c-ink:var(--home-ink)}
+.t-away{--c:var(--away);--c-rgb:var(--away-rgb);--c-ink:var(--away-ink)}
+
+/* ---------- MODULE 1: SCOREBUG ---------- */
+.bug{position:absolute;left:48px;top:40px;display:flex;border-radius:14px;overflow:hidden;
+  background:var(--glass);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
+  box-shadow:0 14px 40px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.09);
+  transition:transform .7s var(--ease-out),opacity .5s ease}
+.bug.off{transform:translateX(-115%);opacity:0}
+.bug::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;
+  background:linear-gradient(90deg,var(--home) 0%,var(--accent) 50%,var(--away) 100%);
+  box-shadow:0 0 16px rgba(var(--accent-rgb),.8)}
+.bug-teams{display:flex;flex-direction:column}
+.bug-row{position:relative;display:flex;align-items:center;width:430px;height:66px;overflow:hidden}
+.bug-row+.bug-row{border-top:1px solid var(--line)}
+.bug-row .strip{align-self:stretch;width:9px;background:var(--c);box-shadow:0 0 18px rgba(var(--c-rgb),.9)}
+.bug-row .logo{width:48px;height:48px;margin:0 12px 0 12px}
+.bug-row .logo .mono{font-size:15px}
+.bug-row .abbr{font-family:var(--display);font-size:42px;line-height:1;letter-spacing:1.5px;width:118px;
+  text-shadow:0 2px 8px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden}
+.bug-row .meta{display:flex;flex-direction:column;gap:4px;align-items:flex-start;width:96px}
+.bug-row .fouls{font-family:var(--heavy);font-size:13px;letter-spacing:1.5px;color:rgba(255,255,255,.72)}
+.bug-row .fouls b{color:#fff;font-size:15px;margin-left:4px}
+.bug-row .bonus{font-family:var(--heavy);font-size:11px;letter-spacing:1.5px;padding:2px 7px;border-radius:4px;
+  background:var(--accent);color:#111;box-shadow:0 0 12px rgba(var(--accent-rgb),.8);
+  transform:scale(0);transform-origin:left center;transition:transform .35s var(--ease-out)}
+.bug-row .bonus.on{transform:scale(1)}
+.bug-row .score{margin-left:auto;height:100%;width:110px;display:grid;place-items:center;
+  font-family:var(--display);font-size:54px;line-height:1;
+  background:linear-gradient(90deg,rgba(var(--c-rgb),0) 0%,rgba(var(--c-rgb),.42) 100%);
+  text-shadow:0 0 18px rgba(var(--c-rgb),.9),0 2px 6px rgba(0,0,0,.6)}
+.bug-row .score span{display:inline-block}
+.bug-row .score span.bump{animation:scoreBump .75s var(--ease-out)}
+.bug-row .sweep{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:linear-gradient(100deg,transparent 0%,rgba(var(--c-rgb),.0) 30%,rgba(255,255,255,.55) 50%,rgba(var(--c-rgb),0) 70%,transparent 100%);
+  transform:translateX(-100%)}
+.bug-row .sweep.go{animation:sweep .8s ease-out}
+@keyframes scoreBump{0%{transform:scale(1)}25%{transform:scale(1.45) translateY(-2px);color:var(--accent)}60%{transform:scale(.94)}100%{transform:scale(1)}}
+@keyframes sweep{0%{opacity:1;transform:translateX(-100%)}100%{opacity:1;transform:translateX(100%)}}
+.bug-side{width:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,0))}
+.bug-period{font-family:var(--heavy);font-size:20px;letter-spacing:2px;color:var(--accent);text-shadow:0 0 12px rgba(var(--accent-rgb),.7);
+  transition:transform .4s var(--ease-out)}
+.bug-period.bump{animation:scoreBump .75s var(--ease-out)}
+.bug-clock{font-family:var(--display);font-size:50px;line-height:1;letter-spacing:1px;min-width:130px;text-align:center;
+  font-variant-numeric:tabular-nums;transition:color .3s}
+.bug-clock.under{color:var(--accent);text-shadow:0 0 14px rgba(var(--accent-rgb),.7)}
+.bug-clock.stopped{opacity:.92}
+.bug-run{width:46px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden}
+.bug-run i{display:block;height:100%;width:100%;background:#2bff88;box-shadow:0 0 10px #2bff88;transform:scaleX(0);transition:transform .3s}
+.bug-run.on i{transform:scaleX(1)}
+
+/* ---------- MODULE 2: THREE-POINT FLASH ---------- */
+.flash{position:absolute;left:0;top:360px;width:1920px;height:360px;display:none;--f:var(--accent);--f-rgb:var(--accent-rgb)}
+.flash.t-home{--f:var(--home);--f-rgb:var(--home-rgb)}
+.flash.t-away{--f:var(--away);--f-rgb:var(--away-rgb)}
+.flash.play{display:block}
+.flash .burst{position:absolute;left:50%;top:50%;width:1400px;height:1400px;margin:-700px 0 0 -700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.55) 0%,rgba(var(--f-rgb),.35) 25%,transparent 60%);opacity:0}
+.flash.play .burst{animation:burst 3s ease-out forwards}
+.flash .band{position:absolute;left:-4%;right:-4%;top:85px;height:190px;transform-origin:center;
+  background:linear-gradient(90deg,transparent 0%,rgba(var(--f-rgb),.82) 14%,rgba(var(--f-rgb),.96) 50%,rgba(var(--f-rgb),.82) 86%,transparent 100%);
+  box-shadow:0 0 60px rgba(var(--f-rgb),.8);border-top:4px solid var(--accent);border-bottom:4px solid var(--accent);
+  transform:skewY(-3deg) scaleX(0)}
+.flash.play .band{animation:band 3s var(--ease-out) forwards}
+.flash .streak{position:absolute;height:6px;width:900px;border-radius:3px;
+  background:linear-gradient(90deg,transparent,#fff,transparent);opacity:0}
+.flash .streak.s1{top:60px;left:-900px}
+.flash .streak.s2{top:300px;left:-900px}
+.flash.play .streak.s1{animation:streak 1.1s .15s ease-out forwards}
+.flash.play .streak.s2{animation:streak 1.1s .3s ease-out forwards}
+.flash .txt{position:absolute;left:0;right:0;top:70px;text-align:center;font-family:var(--display);font-size:210px;line-height:1;
+  letter-spacing:8px;color:#fff;-webkit-text-stroke:3px rgba(0,0,0,.25);opacity:0}
+.flash.play .txt{animation:txtIn 3s var(--ease-out) forwards,glow .45s ease-in-out infinite alternate}
+.flash .sub{position:absolute;left:0;right:0;top:288px;display:flex;justify-content:center;opacity:0}
+.flash .sub span{font-family:var(--heavy);font-size:34px;letter-spacing:6px;padding:8px 26px;border-radius:6px;
+  background:rgba(8,12,22,.85);color:#fff;border:2px solid var(--accent);box-shadow:0 0 22px rgba(var(--accent-rgb),.6)}
+.flash.play .sub{animation:subIn 3s var(--ease-out) forwards}
+@keyframes band{0%{transform:skewY(-3deg) scaleX(0);opacity:0}9%{transform:skewY(-3deg) scaleX(1.02);opacity:1}13%{transform:skewY(-3deg) scaleX(1)}86%{transform:skewY(-3deg) scaleX(1);opacity:1}100%{transform:skewY(-3deg) scaleX(0);opacity:0}}
+@keyframes txtIn{0%{transform:translateX(-110%) skewX(-14deg);opacity:0}11%{transform:translateX(2%) skewX(-14deg) scale(1.12);opacity:1}17%{transform:translateX(0) skewX(-14deg) scale(1)}86%{transform:translateX(0) skewX(-14deg) scale(1);opacity:1}100%{transform:translateX(110%) skewX(-14deg);opacity:0}}
+@keyframes glow{from{text-shadow:0 0 8px #fff,0 0 26px rgba(var(--accent-rgb),.9),0 0 60px rgba(var(--f-rgb),1),0 6px 0 rgba(0,0,0,.35)}
+  to{text-shadow:0 0 18px #fff,0 0 52px rgba(var(--accent-rgb),1),0 0 120px rgba(var(--f-rgb),1),0 6px 0 rgba(0,0,0,.35)}}
+@keyframes subIn{0%,12%{transform:translateY(30px);opacity:0}20%{transform:translateY(0);opacity:1}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(20px)}}
+@keyframes burst{0%{opacity:0;transform:scale(.2)}10%{opacity:1;transform:scale(1)}40%{opacity:.25}100%{opacity:0;transform:scale(1.3)}}
+@keyframes streak{0%{opacity:0;transform:translateX(0)}20%{opacity:1}100%{opacity:0;transform:translateX(3000px)}}
+
+/* ---------- MODULE 3: STARTING LINEUP CARD ---------- */
+.lineup{position:absolute;left:240px;top:205px;width:1440px;height:760px;display:grid;grid-template-columns:500px 1fr;
+  border-radius:22px;overflow:hidden;background:var(--glass-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.1),0 0 60px rgba(var(--c-rgb),.35);
+  opacity:0;transform:translateY(60px) scale(.96);transition:opacity .55s ease,transform .7s var(--ease-out)}
+.lineup.show{opacity:1;transform:none}
+.lu-side{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;
+  background:linear-gradient(160deg,rgba(var(--c-rgb),.95) 0%,rgba(var(--c-rgb),.55) 55%,rgba(8,12,22,.6) 100%);overflow:hidden}
+.lu-side::before{content:"";position:absolute;inset:-40%;background:repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 24px,transparent 24px 60px)}
+.lu-side>*{position:relative}
+.lu-side .logo{width:250px;height:250px;margin-bottom:26px;transform:scale(.6) rotate(-12deg);opacity:0;transition:transform .8s .15s var(--ease-out),opacity .5s .15s}
+.lu-side .logo .mono{font-size:90px;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.45),transparent 55%),rgba(8,12,22,.55);color:#fff}
+.lineup.show .lu-side .logo{transform:none;opacity:1}
+.lu-kicker{font-family:var(--heavy);font-size:22px;letter-spacing:8px;color:var(--accent);text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.lu-team{font-family:var(--display);font-size:66px;line-height:1.02;margin:10px 0 0;color:#fff;text-shadow:0 4px 14px rgba(0,0,0,.45);text-transform:uppercase}
+.lu-coach{margin-top:auto;width:100%;padding-top:22px;border-top:2px solid rgba(255,255,255,.3)}
+.lu-coach small{display:block;font-family:var(--heavy);font-size:16px;letter-spacing:5px;color:rgba(255,255,255,.8)}
+.lu-coach b{display:block;font-family:var(--display);font-size:40px;font-weight:normal;letter-spacing:1px;margin-top:4px;text-transform:uppercase}
+.lu-main{display:flex;flex-direction:column;padding:36px 48px 40px}
+.lu-head{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid rgba(var(--c-rgb),.9);margin-bottom:12px}
+.lu-head h2{font-family:var(--display);font-weight:normal;font-size:58px;letter-spacing:3px}
+.lu-head h2 em{font-style:normal;color:var(--accent);text-shadow:0 0 16px rgba(var(--accent-rgb),.6)}
+.lu-head span{font-family:var(--heavy);font-size:18px;letter-spacing:4px;color:rgba(255,255,255,.6)}
+.lu-rows{flex:1;display:flex;flex-direction:column;justify-content:space-around}
+.lu-row{display:flex;align-items:center;gap:28px;height:104px;padding-right:20px;border-radius:12px;
+  background:linear-gradient(90deg,rgba(255,255,255,.07),rgba(255,255,255,.015));box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  opacity:0;transform:translateX(80px);transition:opacity .45s ease,transform .6s var(--ease-out)}
+.lineup.show .lu-row{opacity:1;transform:none}
+.lineup.show .lu-row:nth-child(1){transition-delay:.25s}
+.lineup.show .lu-row:nth-child(2){transition-delay:.33s}
+.lineup.show .lu-row:nth-child(3){transition-delay:.41s}
+.lineup.show .lu-row:nth-child(4){transition-delay:.49s}
+.lineup.show .lu-row:nth-child(5){transition-delay:.57s}
+.lu-num{width:120px;height:100%;display:grid;place-items:center;border-radius:12px 0 0 12px;
+  font-family:var(--display);font-size:64px;background:var(--c);color:var(--c-ink);box-shadow:0 0 24px rgba(var(--c-rgb),.6)}
+.lu-name{flex:1;font-family:var(--display);font-size:60px;line-height:1;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lu-pos{min-width:84px;text-align:center;font-family:var(--heavy);font-size:24px;letter-spacing:3px;padding:8px 14px;border-radius:8px;
+  border:2px solid var(--accent);color:var(--accent);text-transform:uppercase}
+
+/* ---------- MODULE 4: LIVE STATS SIDEBAR ---------- */
+.stats{position:absolute;right:48px;top:150px;width:580px;border-radius:18px;overflow:hidden;
+  background:var(--glass-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:0 26px 70px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.1);
+  transform:translateX(680px);transition:transform .75s var(--ease-out)}
+.stats.show{transform:none}
+.st-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:20px 22px 16px;
+  background:linear-gradient(90deg,rgba(var(--home-rgb),.75),rgba(8,12,22,.2) 45%,rgba(8,12,22,.2) 55%,rgba(var(--away-rgb),.75))}
+.st-team{display:flex;align-items:center;gap:12px}
+.st-team.r{justify-content:flex-end}
+.st-team .logo{width:56px;height:56px}
+.st-team .logo .mono{font-size:17px}
+.st-team b{font-family:var(--display);font-weight:normal;font-size:44px;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.st-title{text-align:center}
+.st-title div{font-family:var(--heavy);font-size:20px;letter-spacing:5px}
+.st-title small{display:block;margin-top:4px;font-family:var(--heavy);font-size:13px;letter-spacing:3px;color:var(--accent)}
+.st-rows{padding:8px 22px 22px}
+.st-row{padding:14px 0 12px;border-bottom:1px solid var(--line);opacity:0;transform:translateX(40px);transition:opacity .4s,transform .55s var(--ease-out)}
+.st-row:last-child{border-bottom:0}
+.stats.show .st-row{opacity:1;transform:none}
+.stats.show .st-row:nth-child(1){transition-delay:.25s}
+.stats.show .st-row:nth-child(2){transition-delay:.31s}
+.stats.show .st-row:nth-child(3){transition-delay:.37s}
+.stats.show .st-row:nth-child(4){transition-delay:.43s}
+.stats.show .st-row:nth-child(5){transition-delay:.49s}
+.stats.show .st-row:nth-child(6){transition-delay:.55s}
+.st-line{display:grid;grid-template-columns:150px 1fr 150px;align-items:center}
+.st-val{font-family:var(--display);font-size:46px;line-height:1}
+.st-val.r{text-align:right}
+.st-val small{font-family:var(--heavy);font-size:14px;letter-spacing:1px;color:rgba(255,255,255,.6);margin-left:6px}
+.st-val.r small{margin:0 6px 0 0}
+.st-val.lead{color:var(--accent);text-shadow:0 0 14px rgba(var(--accent-rgb),.55)}
+.st-lbl{text-align:center;font-family:var(--heavy);font-size:17px;letter-spacing:3px;color:rgba(255,255,255,.85)}
+.st-bar{display:flex;gap:4px;height:8px;margin-top:10px}
+.st-bar i{display:block;height:100%;border-radius:4px;transition:flex-grow .8s var(--ease-out)}
+.st-bar .h{background:var(--home);box-shadow:0 0 10px rgba(var(--home-rgb),.8)}
+.st-bar .a{background:var(--away);box-shadow:0 0 10px rgba(var(--away-rgb),.8)}
+
+/* First-run hint shown only when the overlay is opened directly in a normal browser tab */
+.hint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);pointer-events:auto;z-index:5;
+  font:600 14px/1.45 var(--ui);color:#e8ecf6;background:rgba(8,12,22,.92);border:1px solid rgba(255,255,255,.15);
+  border-radius:12px;padding:12px 18px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:opacity .6s;max-width:92vw;text-align:center}
+.hint a{color:var(--accent)}
+.hint.gone{opacity:0;pointer-events:none}
+
+/* =====================================================================
+   OPERATOR CONTROL PANEL
+   ===================================================================== */
+.cp{min-height:100vh;color:#e6ebf5;font-family:var(--ui);font-size:14px;
+  background:radial-gradient(1200px 600px at 0% 0%,rgba(var(--home-rgb),.16),transparent 60%),
+             radial-gradient(1200px 600px at 100% 0%,rgba(var(--away-rgb),.16),transparent 60%),#070a12}
+.cp button,.cp input,.cp select{font:inherit;color:inherit}
+.cp-top{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:12px 20px;background:rgba(7,10,18,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:26px;letter-spacing:2px}
+.brand b{color:var(--accent);font-weight:normal}
+.brand small{font-family:var(--heavy);font-size:11px;letter-spacing:3px;color:#8b95ab;margin-left:6px}
+.brand .dot{width:12px;height:12px;border-radius:50%;background:#ff3355;box-shadow:0 0 12px #ff3355;animation:live 1.4s infinite}
+@keyframes live{50%{opacity:.35}}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sync{font-family:var(--heavy);font-size:11px;letter-spacing:2px;color:#2bff88;padding:6px 10px;border-radius:999px;background:rgba(43,255,136,.08);border:1px solid rgba(43,255,136,.3);transition:background .2s}
+.sync.pulse{background:rgba(43,255,136,.3)}
+.cp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:16px 20px 40px;max-width:1800px;margin:0 auto}
+.span-2{grid-column:span 2}
+.span-3{grid-column:1/-1}
+@media (max-width:1200px){.cp-grid{grid-template-columns:1fr 1fr}.span-2,.span-3{grid-column:1/-1}}
+@media (max-width:760px){.cp-grid{grid-template-columns:1fr;padding:12px}.span-2,.span-3{grid-column:auto}}
+.card{position:relative;background:rgba(18,24,40,.72);border:1px solid var(--line);border-radius:16px;padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);min-width:0}
+.card h3{font-family:var(--heavy);font-size:12px;letter-spacing:3px;color:#8b95ab;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h3 .tag{font-size:10px;letter-spacing:2px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.06);color:#aab3c7}
+.btn{appearance:none;border:1px solid rgba(255,255,255,.14);background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));
+  border-radius:10px;padding:10px 14px;font-family:var(--heavy);font-size:13px;letter-spacing:1px;cursor:pointer;user-select:none;
+  transition:transform .08s,background .15s,box-shadow .15s,border-color .15s;white-space:nowrap}
+.btn:hover{border-color:rgba(255,255,255,.3);background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05))}
+.btn:active{transform:scale(.96)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.danger{border-color:rgba(255,60,90,.45);color:#ff8ea2}
+.btn.ghost{background:transparent}
+.btn.on{background:var(--accent);color:#111;border-color:var(--accent);box-shadow:0 0 18px rgba(var(--accent-rgb),.55)}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+
+.team-ctl{border-top:4px solid var(--c);box-shadow:0 10px 30px rgba(0,0,0,.35),0 -6px 30px rgba(var(--c-rgb),.18)}
+.tc-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;min-width:0}
+.tc-head .logo{width:40px;height:40px}
+.tc-head .logo .mono{font-size:13px}
+.tc-abbr{font-family:var(--display);font-size:30px;letter-spacing:1px;color:var(--c);text-shadow:0 0 12px rgba(var(--c-rgb),.6)}
+.tc-name{font-family:var(--heavy);font-size:12px;letter-spacing:1px;color:#aab3c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-score{font-family:var(--display);font-size:110px;line-height:1;text-align:center;margin:6px 0 12px;text-shadow:0 0 30px rgba(var(--c-rgb),.55)}
+.score-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.score-btns .btn{font-family:var(--display);font-size:34px;padding:14px 0;letter-spacing:1px;
+  border-color:rgba(var(--c-rgb),.6);background:linear-gradient(180deg,rgba(var(--c-rgb),.45),rgba(var(--c-rgb),.15))}
+.score-btns .btn:hover{background:linear-gradient(180deg,rgba(var(--c-rgb),.65),rgba(var(--c-rgb),.25))}
+.score-btns .btn.three{box-shadow:0 0 18px rgba(var(--accent-rgb),.35);border-color:var(--accent)}
+.score-btns .btn.minus{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);color:#ff8ea2}
+.tc-sub{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap}
+.foul-box{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:6px 8px}
+.foul-box span{font-family:var(--heavy);font-size:11px;letter-spacing:2px;color:#8b95ab}
+.foul-box b{font-family:var(--display);font-size:32px;font-weight:normal;min-width:34px;text-align:center}
+.foul-box .bonus-tag{font-family:var(--heavy);font-size:10px;letter-spacing:1px;padding:3px 6px;border-radius:5px;background:var(--accent);color:#111;visibility:hidden}
+.foul-box .bonus-tag.on{visibility:visible}
+
+.clock-ctl{text-align:center;display:flex;flex-direction:column;gap:12px}
+.period-line{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.period-line .pl{font-family:var(--display);font-size:38px;letter-spacing:2px;color:var(--accent);text-shadow:0 0 16px rgba(var(--accent-rgb),.5)}
+.big-clock{font-family:var(--display);font-size:120px;line-height:1;letter-spacing:2px;font-variant-numeric:tabular-nums;
+  padding:10px 0;border-radius:14px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
+.big-clock.running{color:#2bff88;text-shadow:0 0 26px rgba(43,255,136,.55)}
+.big-clock.zero{color:#ff3355;text-shadow:0 0 26px rgba(255,51,85,.6)}
+.clock-btn{font-family:var(--display)!important;font-size:38px!important;letter-spacing:3px;padding:18px!important;border-radius:14px!important;
+  background:linear-gradient(180deg,#22c96f,#139a50)!important;border-color:#2bff88!important;color:#fff;box-shadow:0 0 26px rgba(43,255,136,.35)}
+.clock-btn.running{background:linear-gradient(180deg,#ff3d5e,#c41a39)!important;border-color:#ff7088!important;box-shadow:0 0 26px rgba(255,51,85,.4)}
+.clock-btn small{display:block;font-family:var(--heavy);font-size:11px;letter-spacing:3px;opacity:.85;margin-top:2px}
+.adj-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.set-row{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.lbl{font-family:var(--heavy);font-size:10px;letter-spacing:2px;color:#8b95ab}
+.inp{width:100%;min-width:0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:9px 10px;color:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.2)}
+.inp.big{font-family:var(--display);font-size:28px;text-align:center;letter-spacing:2px}
+input[type=color].inp{padding:3px;height:40px;cursor:pointer}
+input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:#cfd6e4;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+
+.trig{display:flex;flex-direction:column;gap:12px}
+.trig-group{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid var(--line)}
+.trig-group .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.trig-group .btn{padding:14px 10px;font-size:14px}
+
+.stat-table{width:100%;border-collapse:separate;border-spacing:0 6px}
+.stat-table th{font-family:var(--heavy);font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:center;padding-bottom:2px}
+.stat-table th:first-child{text-align:left}
+.stat-table td{padding:6px 6px;background:rgba(0,0,0,.22)}
+.stat-table td:first-child{border-radius:10px 0 0 10px;font-family:var(--heavy);font-size:12px;letter-spacing:1px}
+.stat-table td:last-child{border-radius:0 10px 10px 0}
+.stepper{display:flex;align-items:center;justify-content:center;gap:6px}
+.stepper b{font-family:var(--display);font-weight:normal;font-size:24px;min-width:40px;text-align:center}
+.stepper .btn{padding:4px 12px;font-size:16px}
+.th-home{color:var(--home)!important}.th-away{color:var(--away)!important}
+
+.preview-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  background-color:#1b2030;background-image:linear-gradient(45deg,#242a3c 25%,transparent 25%),linear-gradient(-45deg,#242a3c 25%,transparent 25%),
+  linear-gradient(45deg,transparent 75%,#242a3c 75%),linear-gradient(-45deg,transparent 75%,#242a3c 75%);
+  background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}
+.preview-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
+.note{font-size:12px;color:#8b95ab;line-height:1.5;margin-top:10px}
+.note code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px;color:#d8deea}
+kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;background:#e6ebf5;color:#111}
+
+.team-cfg{border-left:4px solid var(--c);padding-left:14px;display:flex;flex-direction:column;gap:10px}
+.team-cfg+.team-cfg{margin-top:18px}
+.team-cfg h4{font-family:var(--display);font-weight:normal;font-size:22px;letter-spacing:2px;color:var(--c)}
+.logo-row{display:flex;gap:10px;align-items:flex-end}
+.logo-row .logo{width:44px;height:44px}
+.logo-row .logo .mono{font-size:14px}
+.logo-row .field{flex:1}
+
+.roster{width:100%;border-collapse:collapse}
+.roster th{font-family:var(--heavy);font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:left;padding:4px 4px}
+.roster td{padding:3px 4px}
+.roster td:first-child{width:70px}
+.roster td:last-child{width:80px}
+.roster .inp{padding:7px 8px}
+.roster-team+.roster-team{margin-top:16px}
+.roster-team h4{font-family:var(--display);font-weight:normal;font-size:20px;letter-spacing:2px;color:var(--c);margin-bottom:6px}
+.toast{position:fixed;right:20px;bottom:20px;z-index:20;background:#111827;border:1px solid var(--accent);color:#fff;padding:12px 16px;border-radius:10px;
+  font-family:var(--heavy);font-size:12px;letter-spacing:1px;box-shadow:0 10px 30px rgba(0,0,0,.5);transform:translateY(140%);transition:transform .35s var(--ease-out)}
+.toast.show{transform:none}
+</style>
+</head>
+<body>
+
+<!-- =====================================================================
+     STREAM OVERLAY VIEW
+     ===================================================================== -->
+<div id="overlay">
+  <div class="stage" id="stage">
+
+    <!-- MODULE 1: SCOREBUG -->
+    <div class="bug" id="bug">
+      <div class="bug-teams">
+        <div class="bug-row t-home">
+          <div class="strip"></div>
+          <div class="logo" data-logo-for="home"><img alt=""><span class="mono"></span></div>
+          <div class="abbr" data-o="home.abbr"></div>
+          <div class="meta">
+            <div class="fouls">FOULS<b data-o="home.fouls"></b></div>
+            <div class="bonus" id="bonusHome">BONUS</div>
+          </div>
+          <div class="score"><span id="scoreHome">0</span></div>
+          <div class="sweep" id="sweepHome"></div>
+        </div>
+        <div class="bug-row t-away">
+          <div class="strip"></div>
+          <div class="logo" data-logo-for="away"><img alt=""><span class="mono"></span></div>
+          <div class="abbr" data-o="away.abbr"></div>
+          <div class="meta">
+            <div class="fouls">FOULS<b data-o="away.fouls"></b></div>
+            <div class="bonus" id="bonusAway">BONUS</div>
+          </div>
+          <div class="score"><span id="scoreAway">0</span></div>
+          <div class="sweep" id="sweepAway"></div>
+        </div>
+      </div>
+      <div class="bug-side">
+        <div class="bug-period" id="bugPeriod">1ST</div>
+        <div class="bug-clock" id="bugClock">8:00</div>
+        <div class="bug-run" id="bugRun"><i></i></div>
+      </div>
+    </div>
+
+    <!-- MODULE 2: THREE-POINT FLASH -->
+    <div class="flash" id="flash">
+      <div class="burst"></div>
+      <div class="band"></div>
+      <div class="streak s1"></div>
+      <div class="streak s2"></div>
+      <div class="txt">3-POINTER!</div>
+      <div class="sub"><span id="flashSub">HOME +3</span></div>
+    </div>
+
+    <!-- MODULE 3: STARTING LINEUP CARD -->
+    <div class="lineup t-home" id="lineup">
+      <div class="lu-side">
+        <div class="logo" id="luLogo"><img alt=""><span class="mono"></span></div>
+        <div class="lu-kicker">TONIGHT'S STARTERS</div>
+        <div class="lu-team" id="luTeam">HOME</div>
+        <div class="lu-coach"><small>HEAD COACH</small><b id="luCoach">COACH</b></div>
+      </div>
+      <div class="lu-main">
+        <div class="lu-head"><h2>STARTING <em>LINEUP</em></h2><span id="luAbbr">HOME</span></div>
+        <div class="lu-rows" id="luRows"></div>
+      </div>
+    </div>
+
+    <!-- MODULE 4: LIVE STATS SIDEBAR -->
+    <div class="stats" id="stats">
+      <div class="st-head">
+        <div class="st-team t-home"><div class="logo" data-logo-for="home"><img alt=""><span class="mono"></span></div><b data-o="home.abbr"></b></div>
+        <div class="st-title"><div>TEAM STATS</div><small id="stPeriod">1ST QTR</small></div>
+        <div class="st-team r t-away"><b data-o="away.abbr"></b><div class="logo" data-logo-for="away"><img alt=""><span class="mono"></span></div></div>
+      </div>
+      <div class="st-rows" id="stRows"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- =====================================================================
+     OPERATOR CONTROL PANEL
+     ===================================================================== -->
+<div id="control" class="cp">
+  <header class="cp-top">
+    <div class="brand"><span class="dot"></span>HOOPS<b>CAST</b><small>OPERATOR SWITCHBOARD</small></div>
+    <div class="top-actions">
+      <span class="sync" id="syncBadge">● LIVE SYNC</span>
+      <button class="btn sm" data-act="openOverlay">OPEN OVERLAY WINDOW</button>
+      <button class="btn sm danger" data-act="resetGame">RESET GAME</button>
+    </div>
+  </header>
+
+  <main class="cp-grid">
+
+    <!-- CORE SCOREBOARD: HOME -->
+    <section class="card team-ctl t-home">
+      <h3>HOME SCORING <span class="tag">TEAM 1</span></h3>
+      <div class="tc-head"><div class="logo" data-logo-for="home"><img alt=""><span class="mono"></span></div>
+        <span class="tc-abbr" data-o="home.abbr"></span><span class="tc-name" data-o="home.name"></span></div>
+      <div class="tc-score" data-o="home.score">0</div>
+      <div class="score-btns">
+        <button class="btn" data-act="score" data-team="home" data-n="1">+1</button>
+        <button class="btn" data-act="score" data-team="home" data-n="2">+2</button>
+        <button class="btn three" data-act="score" data-team="home" data-n="3">+3</button>
+        <button class="btn minus" data-act="score" data-team="home" data-n="-1">−1</button>
+      </div>
+      <div class="tc-sub">
+        <div class="foul-box">
+          <span>TEAM FOULS</span>
+          <button class="btn sm" data-act="foul" data-team="home" data-n="-1">−</button>
+          <b data-o="home.fouls">0</b>
+          <button class="btn sm" data-act="foul" data-team="home" data-n="1">+ FOUL</button>
+          <span class="bonus-tag" id="cpBonusHome">BONUS</span>
+        </div>
+        <button class="btn sm" data-act="ftMiss" data-team="home">FT MISS</button>
+      </div>
+    </section>
+
+    <!-- CLOCK CONTROLLER -->
+    <section class="card clock-ctl">
+      <h3>GAME CLOCK &amp; PERIOD <span class="tag"><kbd>SPACE</kbd>&nbsp; START / STOP</span></h3>
+      <div class="period-line">
+        <button class="btn sm" data-act="period" data-n="-1">◀ PREV</button>
+        <span class="pl" id="cpPeriod">1ST</span>
+        <button class="btn" data-act="period" data-n="1">NEXT PERIOD ▶</button>
+      </div>
+      <div class="big-clock" id="cpClock">8:00</div>
+      <button class="btn clock-btn" id="clockBtn" data-act="clockToggle">START CLOCK<small>PRESS SPACEBAR</small></button>
+      <div class="adj-row">
+        <button class="btn sm" data-act="clockAdj" data-n="-10">−10s</button>
+        <button class="btn sm" data-act="clockAdj" data-n="-1">−1s</button>
+        <button class="btn sm" data-act="clockAdj" data-n="1">+1s</button>
+        <button class="btn sm" data-act="clockAdj" data-n="10">+10s</button>
+      </div>
+      <div class="adj-row">
+        <button class="btn sm" data-act="clockAdj" data-n="-0.1">−0.1s</button>
+        <button class="btn sm" data-act="clockAdj" data-n="0.1">+0.1s</button>
+        <button class="btn sm" data-act="clockAdj" data-n="-60">−1:00</button>
+        <button class="btn sm" data-act="clockAdj" data-n="60">+1:00</button>
+      </div>
+      <div class="set-row">
+        <input class="inp big" id="clockInput" placeholder="MM:SS" autocomplete="off" spellcheck="false" aria-label="Set clock time (MM:SS or SS.t)">
+        <button class="btn" data-act="clockSet">SET TIME</button>
+        <button class="btn" data-act="clockReset">FULL PERIOD</button>
+      </div>
+    </section>
+
+    <!-- CORE SCOREBOARD: AWAY -->
+    <section class="card team-ctl t-away">
+      <h3>AWAY SCORING <span class="tag">TEAM 2</span></h3>
+      <div class="tc-head"><div class="logo" data-logo-for="away"><img alt=""><span class="mono"></span></div>
+        <span class="tc-abbr" data-o="away.abbr"></span><span class="tc-name" data-o="away.name"></span></div>
+      <div class="tc-score" data-o="away.score">0</div>
+      <div class="score-btns">
+        <button class="btn" data-act="score" data-team="away" data-n="1">+1</button>
+        <button class="btn" data-act="score" data-team="away" data-n="2">+2</button>
+        <button class="btn three" data-act="score" data-team="away" data-n="3">+3</button>
+        <button class="btn minus" data-act="score" data-team="away" data-n="-1">−1</button>
+      </div>
+      <div class="tc-sub">
+        <div class="foul-box">
+          <span>TEAM FOULS</span>
+          <button class="btn sm" data-act="foul" data-team="away" data-n="-1">−</button>
+          <b data-o="away.fouls">0</b>
+          <button class="btn sm" data-act="foul" data-team="away" data-n="1">+ FOUL</button>
+          <span class="bonus-tag" id="cpBonusAway">BONUS</span>
+        </div>
+        <button class="btn sm" data-act="ftMiss" data-team="away">FT MISS</button>
+      </div>
+    </section>
+
+    <!-- TRIGGER TOGGLES -->
+    <section class="card trig">
+      <h3>GRAPHICS TRIGGERS <span class="tag">ON AIR</span></h3>
+      <div class="trig-group">
+        <span class="lbl">STARTING LINEUP CARD</span>
+        <div class="btns">
+          <button class="btn" data-act="lineup" data-team="home" id="tgLuHome">SHOW HOME</button>
+          <button class="btn" data-act="lineup" data-team="away" id="tgLuAway">SHOW AWAY</button>
+        </div>
+      </div>
+      <div class="trig-group">
+        <span class="lbl">LIVE STATS CARD</span>
+        <div class="btns">
+          <button class="btn" data-act="stats" id="tgStats" style="grid-column:1/-1">SHOW STATS</button>
+        </div>
+      </div>
+      <div class="trig-group">
+        <span class="lbl">SCOREBUG</span>
+        <div class="btns">
+          <button class="btn" data-act="bug" id="tgBug" style="grid-column:1/-1">HIDE SCOREBUG</button>
+        </div>
+      </div>
+      <div class="trig-group">
+        <span class="lbl">3-POINT FLASH (TEST WITHOUT SCORING)</span>
+        <div class="btns">
+          <button class="btn sm" data-act="flashTest" data-team="home">TEST HOME</button>
+          <button class="btn sm" data-act="flashTest" data-team="away">TEST AWAY</button>
+        </div>
+      </div>
+      <button class="btn danger" data-act="clearPopups">CLEAR ALL POP-UPS</button>
+    </section>
+
+    <!-- LIVE STAT LOGGER -->
+    <section class="card">
+      <h3>LIVE STAT LOGGER <span class="tag">FEEDS STATS CARD</span></h3>
+      <table class="stat-table">
+        <thead><tr><th>STAT</th><th class="th-home" data-o="home.abbr"></th><th class="th-away" data-o="away.abbr"></th></tr></thead>
+        <tbody id="statLogger"></tbody>
+      </table>
+      <p class="note">+3 automatically logs a 3-pointer. With the setting on, +1 logs a made free throw (FTM and FTA). Use <b>FT MISS</b> to log a missed attempt.</p>
+    </section>
+
+    <!-- PREVIEW -->
+    <section class="card">
+      <h3>PROGRAM PREVIEW <span class="tag">LIVE OVERLAY</span></h3>
+      <div class="preview-wrap"><iframe id="previewFrame" title="Overlay preview"></iframe></div>
+      <p class="note">This preview is the same overlay. Add it to OBS as a <b>Browser Source</b> (1920×1080, local file). The checkerboard shows transparent areas.</p>
+    </section>
+
+    <!-- PRE-GAME CONFIGURATION: TEAMS & BRANDING -->
+    <section class="card">
+      <h3>PRE-GAME CONFIG · TEAMS &amp; BRANDING</h3>
+
+      <div class="team-cfg t-home">
+        <h4>HOME TEAM</h4>
+        <div class="field"><label>SCHOOL / TEAM NAME</label><input class="inp" data-bind="home.name" maxlength="32"></div>
+        <div class="grid2">
+          <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="home.abbr" data-type="upper" maxlength="4"></div>
+          <div class="field"><label>TEAM COLOR</label><input type="color" class="inp" data-bind="home.color"></div>
+        </div>
+        <div class="logo-row">
+          <div class="logo" data-logo-for="home"><img alt=""><span class="mono"></span></div>
+          <div class="field"><label>SCHOOL LOGO (PNG)</label><input type="file" class="inp" accept="image/png,image/*" data-logo-input="home"></div>
+          <button class="btn sm ghost" data-act="clearLogo" data-team="home">CLEAR</button>
+        </div>
+        <div class="field"><label>HEAD COACH</label><input class="inp" data-bind="home.coach" maxlength="32"></div>
+      </div>
+
+      <div class="team-cfg t-away">
+        <h4>AWAY TEAM</h4>
+        <div class="field"><label>SCHOOL / TEAM NAME</label><input class="inp" data-bind="away.name" maxlength="32"></div>
+        <div class="grid2">
+          <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="away.abbr" data-type="upper" maxlength="4"></div>
+          <div class="field"><label>TEAM COLOR</label><input type="color" class="inp" data-bind="away.color"></div>
+        </div>
+        <div class="logo-row">
+          <div class="logo" data-logo-for="away"><img alt=""><span class="mono"></span></div>
+          <div class="field"><label>SCHOOL LOGO (PNG)</label><input type="file" class="inp" accept="image/png,image/*" data-logo-input="away"></div>
+          <button class="btn sm ghost" data-act="clearLogo" data-team="away">CLEAR</button>
+        </div>
+        <div class="field"><label>HEAD COACH</label><input class="inp" data-bind="away.coach" maxlength="32"></div>
+      </div>
+    </section>
+
+    <!-- PRE-GAME CONFIGURATION: ROSTERS -->
+    <section class="card">
+      <h3>PRE-GAME CONFIG · STARTING FIVE <span class="tag">LINEUP CARD</span></h3>
+      <div class="roster-team t-home"><h4>HOME STARTERS</h4><table class="roster" id="rosterHome"></table></div>
+      <div class="roster-team t-away"><h4>AWAY STARTERS</h4><table class="roster" id="rosterAway"></table></div>
+    </section>
+
+    <!-- PRE-GAME CONFIGURATION: BROADCAST / RULES -->
+    <section class="card">
+      <h3>PRE-GAME CONFIG · BROADCAST &amp; RULES</h3>
+      <div class="grid2">
+        <div class="field"><label>BROADCAST ACCENT COLOR</label><input type="color" class="inp" data-bind="accent"></div>
+        <div class="field"><label>PERIODS IN REGULATION</label><input type="number" class="inp" min="1" max="8" data-bind="settings.periods" data-type="int"></div>
+        <div class="field"><label>PERIOD LENGTH (MIN)</label><input type="number" class="inp" min="1" max="60" step="0.5" data-bind="settings.periodMin" data-type="num"></div>
+        <div class="field"><label>OVERTIME LENGTH (MIN)</label><input type="number" class="inp" min="1" max="20" step="0.5" data-bind="settings.otMin" data-type="num"></div>
+        <div class="field"><label>BONUS AT TEAM FOUL #</label><input type="number" class="inp" min="1" max="20" data-bind="settings.bonusAt" data-type="int"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+        <label class="check"><input type="checkbox" data-bind="settings.resetFouls" data-type="bool"> Reset team fouls when advancing period</label>
+        <label class="check"><input type="checkbox" data-bind="settings.ftAuto" data-type="bool"> +1 logs a made free throw (FTM + FTA)</label>
+        <label class="check"><input type="checkbox" data-bind="settings.preview" data-type="bool"> Show live program preview in this panel</label>
+      </div>
+      <p class="note">Rules default to NFHS: four 8:00 quarters, 4:00 overtime, bonus on the 5th team foul of each quarter. Changing period length applies the next time you press <b>FULL PERIOD</b> or <b>NEXT PERIOD</b>.</p>
+      <p class="note"><b>Setup:</b> overlay = this file (no hash) as an OBS Browser Source. Control panel = this file + <code>#control</code>, ideally as an OBS Custom Browser Dock so both share the same storage.</p>
+    </section>
+
+  </main>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===================================================================
+     SHARED: STORAGE KEYS, DEFAULT STATE, HELPERS
+     =================================================================== */
+  var STATE_KEY = 'hoopscast.state.v1';
+  var LOGO_KEY = { home: 'hoopscast.logo.home', away: 'hoopscast.logo.away' };
+  var TEAMS = ['home', 'away'];
+  var MODE = /(^|[#?&])control\b/i.test(location.hash + '&' + location.search) ? 'control' : 'overlay';
+  document.documentElement.classList.add('mode-' + MODE);
+
+  function emptyStats() { return { reb: 0, to: 0, stl: 0, tpm: 0, ftm: 0, fta: 0 }; }
+
+  function defaultState() {
+    return {
+      rev: 0,
+      accent: '#ffd400',
+      home: {
+        name: 'Central Eagles', abbr: 'CEN', color: '#1e6bff', coach: 'Coach Ramirez',
+        score: 0, fouls: 0, stats: emptyStats(),
+        roster: [
+          { num: '3', name: 'Marcus Hill', pos: 'G' },
+          { num: '11', name: 'Jalen Brooks', pos: 'G' },
+          { num: '23', name: 'Devon Carter', pos: 'F' },
+          { num: '32', name: 'Isaiah Moore', pos: 'F' },
+          { num: '45', name: 'Tyler Grant', pos: 'C' }
+        ]
+      },
+      away: {
+        name: 'Westview Wolves', abbr: 'WST', color: '#e0262f', coach: 'Coach Thompson',
+        score: 0, fouls: 0, stats: emptyStats(),
+        roster: [
+          { num: '1', name: 'Andre Lewis', pos: 'G' },
+          { num: '5', name: 'Chris Nguyen', pos: 'G' },
+          { num: '14', name: 'Sam Patel', pos: 'F' },
+          { num: '21', name: 'Noah Bennett', pos: 'F' },
+          { num: '34', name: 'Eli Johnson', pos: 'C' }
+        ]
+      },
+      period: 1,
+      clock: { running: false, remainingMs: 8 * 60000, startedAt: 0 },
+      show: { bug: true, lineup: null, stats: false },
+      flash: { id: 0, team: 'home' },
+      settings: { periods: 4, periodMin: 8, otMin: 4, bonusAt: 5, resetFouls: true, ftAuto: true, preview: true }
+    };
+  }
+
+  function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
+  function merge(base, src) {
+    if (!isObj(src)) return base;
+    Object.keys(base).forEach(function (k) {
+      if (!(k in src)) return;
+      if (isObj(base[k]) && isObj(src[k])) merge(base[k], src[k]);
+      else if (base[k] === null || typeof base[k] === typeof src[k] || src[k] === null) base[k] = src[k];
+    });
+    return base;
+  }
+  function normalize(s) {
+    TEAMS.forEach(function (t) {
+      var r = Array.isArray(s[t].roster) ? s[t].roster : [];
+      var out = [];
+      for (var i = 0; i < 5; i++) {
+        var p = r[i] || {};
+        out.push({ num: String(p.num || ''), name: String(p.name || ''), pos: String(p.pos || '') });
+      }
+      s[t].roster = out;
+    });
+    if (s.show.lineup !== 'home' && s.show.lineup !== 'away') s.show.lineup = null;
+    return s;
+  }
+  function readRaw() { try { return localStorage.getItem(STATE_KEY); } catch (e) { return null; } }
+  function parseState(raw) {
+    var s = defaultState();
+    if (raw) { try { merge(s, JSON.parse(raw)); } catch (e) {} }
+    return normalize(s);
+  }
+  function readLogo(team) { try { return localStorage.getItem(LOGO_KEY[team]) || ''; } catch (e) { return ''; } }
+
+  function getPath(obj, path) {
+    return path.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, obj);
+  }
+  function setPath(obj, path, val) {
+    var keys = path.split('.'), o = obj;
+    for (var i = 0; i < keys.length - 1; i++) o = o[keys[i]];
+    o[keys[keys.length - 1]] = val;
+  }
+  function hexToRgb(hex) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return [255, 255, 255];
+    var n = parseInt(m[1], 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function inkFor(hex) {
+    var c = hexToRgb(hex).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    var L = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    return L > 0.45 ? '#0b0f1a' : '#ffffff';
+  }
+  function applyTheme(s) {
+    var st = document.documentElement.style;
+    TEAMS.forEach(function (t) {
+      st.setProperty('--' + t, s[t].color);
+      st.setProperty('--' + t + '-rgb', hexToRgb(s[t].color).join(','));
+      st.setProperty('--' + t + '-ink', inkFor(s[t].color));
+    });
+    st.setProperty('--accent', s.accent);
+    st.setProperty('--accent-rgb', hexToRgb(s.accent).join(','));
+  }
+
+  function clockRemaining(c) {
+    return c.running ? Math.max(0, c.remainingMs - (Date.now() - c.startedAt)) : Math.max(0, c.remainingMs);
+  }
+  function fmtClock(ms) {
+    ms = Math.max(0, ms);
+    if (ms >= 60000) {
+      var secs = Math.ceil(ms / 1000);
+      var m = Math.floor(secs / 60), sec = secs % 60;
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+    return (Math.floor(ms / 100) / 10).toFixed(1);
+  }
+  function periodLabel(s) {
+    var p = s.period, n = s.settings.periods;
+    if (p <= n) {
+      var sfx = (p % 10 === 1 && p !== 11) ? 'ST' : (p % 10 === 2 && p !== 12) ? 'ND' : (p % 10 === 3 && p !== 13) ? 'RD' : 'TH';
+      return p + sfx;
+    }
+    var ot = p - n;
+    return ot === 1 ? 'OT' : ot + 'OT';
+  }
+  function periodLong(s) {
+    if (s.period > s.settings.periods) return periodLabel(s) === 'OT' ? 'OVERTIME' : periodLabel(s);
+    return periodLabel(s) + (s.settings.periods === 4 ? ' QTR' : s.settings.periods === 2 ? ' HALF' : ' PERIOD');
+  }
+  function periodLengthMs(s) {
+    var min = s.period > s.settings.periods ? s.settings.otMin : s.settings.periodMin;
+    return Math.round((+min || 8) * 60000);
+  }
+  function setText(el, txt) { txt = String(txt); if (el && el.textContent !== txt) el.textContent = txt; }
+  function setLogoEl(el, team, s) {
+    var src = readLogo(team);
+    var img = el.querySelector('img'), mono = el.querySelector('.mono');
+    el.classList.remove('t-home', 't-away'); el.classList.add('t-' + team);
+    if (src) { if (img.getAttribute('src') !== src) img.src = src; el.classList.add('has-img'); }
+    else { img.removeAttribute('src'); el.classList.remove('has-img'); }
+    setText(mono, (s[team].abbr || team).slice(0, 3).toUpperCase());
+  }
+  function renderOutputs(root, s) {
+    root.querySelectorAll('[data-o]').forEach(function (el) {
+      var v = getPath(s, el.getAttribute('data-o'));
+      setText(el, v == null ? '' : v);
+    });
+    root.querySelectorAll('[data-logo-for]').forEach(function (el) { setLogoEl(el, el.getAttribute('data-logo-for'), s); });
+  }
+  function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+  var STAT_ROWS = [
+    { key: 'pts', label: 'POINTS' },
+    { key: 'tpm', label: '3-POINTERS' },
+    { key: 'ft', label: 'FREE THROW %' },
+    { key: 'reb', label: 'REBOUNDS' },
+    { key: 'to', label: 'TURNOVERS', lowerBetter: true },
+    { key: 'stl', label: 'STEALS' }
+  ];
+  function statValue(s, team, key) {
+    var t = s[team];
+    if (key === 'pts') return { n: t.score, txt: String(t.score) };
+    if (key === 'ft') {
+      var pct = t.stats.fta > 0 ? Math.round(100 * t.stats.ftm / t.stats.fta) : 0;
+      return { n: pct, txt: (t.stats.fta > 0 ? pct + '%' : '—'), small: t.stats.ftm + '/' + t.stats.fta };
+    }
+    return { n: t.stats[key], txt: String(t.stats[key]) };
+  }
+
+  if (MODE === 'overlay') initOverlay(); else initControl();
+
+  /* ===================================================================
+     OVERLAY VIEW
+     =================================================================== */
+  function initOverlay() {
+    var stage = document.getElementById('stage');
+    var $ = function (id) { return document.getElementById(id); };
+    var bug = $('bug'), flash = $('flash'), lineup = $('lineup'), stats = $('stats');
+    var bugClock = $('bugClock'), bugRun = $('bugRun'), bugPeriod = $('bugPeriod');
+    var scoreEl = { home: $('scoreHome'), away: $('scoreAway') };
+    var sweepEl = { home: $('sweepHome'), away: $('sweepAway') };
+    var bonusEl = { home: $('bonusHome'), away: $('bonusAway') };
+
+    var lastRaw = readRaw();
+    var state = parseState(lastRaw);
+    var lastLogos = { home: readLogo('home'), away: readLogo('away') };
+    var prev = { home: state.home.score, away: state.away.score, period: state.period };
+    var lastFlashId = state.flash.id;
+    var flashTimer = null;
+
+    // Build lineup rows and stats rows once.
+    var luRows = $('luRows');
+    for (var i = 0; i < 5; i++) {
+      var r = document.createElement('div');
+      r.className = 'lu-row';
+      r.innerHTML = '<div class="lu-num"></div><div class="lu-name"></div><div class="lu-pos"></div>';
+      luRows.appendChild(r);
+    }
+    var stRows = $('stRows');
+    var statEls = {};
+    STAT_ROWS.forEach(function (row) {
+      var d = document.createElement('div');
+      d.className = 'st-row';
+      d.innerHTML = '<div class="st-line"><div class="st-val h"></div><div class="st-lbl"></div><div class="st-val r a"></div></div>' +
+                    '<div class="st-bar"><i class="h"></i><i class="a"></i></div>';
+      d.querySelector('.st-lbl').textContent = row.label;
+      stRows.appendChild(d);
+      statEls[row.key] = { h: d.querySelector('.st-val.h'), a: d.querySelector('.st-val.a'), bh: d.querySelector('.st-bar .h'), ba: d.querySelector('.st-bar .a') };
+    });
+
+    function fit() {
+      var sc = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      var x = (window.innerWidth - 1920 * sc) / 2, y = (window.innerHeight - 1080 * sc) / 2;
+      stage.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + sc + ')';
+    }
+    window.addEventListener('resize', fit);
+    fit();
+
+    function fillValue(el, v) {
+      el.textContent = v.txt;
+      if (v.small) {
+        var sm = document.createElement('small');
+        sm.textContent = v.small;
+        if (el.classList.contains('r')) el.insertBefore(sm, el.firstChild); else el.appendChild(sm);
+      }
+    }
+    function renderStats(s) {
+      setText($('stPeriod'), periodLong(s));
+      STAT_ROWS.forEach(function (row) {
+        var e = statEls[row.key];
+        var h = statValue(s, 'home', row.key), a = statValue(s, 'away', row.key);
+        fillValue(e.h, h); fillValue(e.a, a);
+        var better = row.lowerBetter ? (h.n < a.n ? 'h' : a.n < h.n ? 'a' : '') : (h.n > a.n ? 'h' : a.n > h.n ? 'a' : '');
+        e.h.classList.toggle('lead', better === 'h');
+        e.a.classList.toggle('lead', better === 'a');
+        var tot = h.n + a.n;
+        e.bh.style.flexGrow = tot > 0 ? h.n / tot : 0.5;
+        e.ba.style.flexGrow = tot > 0 ? a.n / tot : 0.5;
+      });
+    }
+
+    var luTarget = null, luShown = null, luTimer = null;
+    function fillLineup(team, s) {
+      var t = s[team];
+      lineup.classList.remove('t-home', 't-away'); lineup.classList.add('t-' + team);
+      setLogoEl($('luLogo'), team, s);
+      setText($('luTeam'), t.name || team.toUpperCase());
+      setText($('luAbbr'), (t.abbr || '').toUpperCase());
+      setText($('luCoach'), t.coach || '—');
+      var rows = luRows.children;
+      for (var i = 0; i < 5; i++) {
+        var p = t.roster[i];
+        setText(rows[i].children[0], p.num || '');
+        setText(rows[i].children[1], p.name || '');
+        setText(rows[i].children[2], p.pos || '');
+        rows[i].style.visibility = (p.num || p.name || p.pos) ? '' : 'hidden';
+      }
+    }
+    function updateLineup(s) {
+      var target = s.show.lineup;
+      if (target === luTarget) { if (luShown) fillLineup(luShown, s); return; }
+      luTarget = target;
+      clearTimeout(luTimer);
+      if (luShown) {
+        lineup.classList.remove('show');
+        luShown = null;
+        if (target) luTimer = setTimeout(function () {
+          if (!luTarget) return;
+          fillLineup(luTarget, state); void lineup.offsetWidth;
+          lineup.classList.add('show'); luShown = luTarget;
+        }, 700);
+      } else if (target) {
+        fillLineup(target, s); void lineup.offsetWidth;
+        lineup.classList.add('show'); luShown = target;
+      }
+    }
+
+    function playFlash(team, s) {
+      flash.classList.remove('play', 't-home', 't-away');
+      flash.classList.add('t-' + team);
+      setText($('flashSub'), (s[team].abbr || team.toUpperCase()) + '  +3');
+      void flash.offsetWidth;
+      flash.classList.add('play');
+      clearTimeout(flashTimer);
+      flashTimer = setTimeout(function () { flash.classList.remove('play'); }, 3000);
+    }
+
+    function render(s, first) {
+      applyTheme(s);
+      renderOutputs(stage, s);
+      TEAMS.forEach(function (t) {
+        if (s[t].score !== prev[t]) {
+          setText(scoreEl[t], s[t].score);
+          if (!first && s[t].score > prev[t]) { restart(scoreEl[t], 'bump'); restart(sweepEl[t], 'go'); }
+          prev[t] = s[t].score;
+        } else if (first) setText(scoreEl[t], s[t].score);
+        var opp = t === 'home' ? 'away' : 'home';
+        bonusEl[t].classList.toggle('on', s[opp].fouls >= s.settings.bonusAt);
+      });
+      setText(bugPeriod, periodLabel(s));
+      if (!first && s.period !== prev.period) restart(bugPeriod, 'bump');
+      prev.period = s.period;
+      bug.classList.toggle('off', !s.show.bug);
+      stats.classList.toggle('show', !!s.show.stats);
+      renderStats(s);
+      updateLineup(s);
+      if (s.flash.id !== lastFlashId) {
+        lastFlashId = s.flash.id;
+        if (!first && Date.now() - s.flash.id < 5000) playFlash(s.flash.team === 'away' ? 'away' : 'home', s);
+      }
+    }
+
+    function pull() {
+      var raw = readRaw();
+      if (raw === lastRaw) return;
+      lastRaw = raw;
+      state = parseState(raw);
+      render(state, false);
+    }
+    function pullLogos() {
+      var changed = false;
+      TEAMS.forEach(function (t) { var l = readLogo(t); if (l !== lastLogos[t]) { lastLogos[t] = l; changed = true; } });
+      if (changed) { renderOutputs(stage, state); if (luShown) fillLineup(luShown, state); }
+    }
+
+    // Real-time sync: storage events fire instantly in other tabs/frames; polling is a safety net.
+    window.addEventListener('storage', function (e) {
+      if (e.key === STATE_KEY || e.key === null) pull();
+      if (e.key === LOGO_KEY.home || e.key === LOGO_KEY.away || e.key === null) pullLogos();
+    });
+    setInterval(function () { pull(); pullLogos(); }, 400);
+
+    // Clock render loop (computed from shared timestamps, so it never drifts).
+    var lastClockTxt = '';
+    (function tick() {
+      var ms = clockRemaining(state.clock);
+      var txt = fmtClock(ms);
+      if (txt !== lastClockTxt) { bugClock.textContent = txt; lastClockTxt = txt; }
+      bugClock.classList.toggle('under', ms < 60000);
+      bugClock.classList.toggle('stopped', !state.clock.running);
+      bugRun.classList.toggle('on', state.clock.running && ms > 0);
+      requestAnimationFrame(tick);
+    })();
+
+    render(state, true);
+
+    // Helper hint only when opened directly in a regular browser tab (never inside OBS or the preview frame).
+    if (!window.obsstudio && window.self === window.top) {
+      var hint = document.createElement('div');
+      hint.className = 'hint';
+      var base = location.href.replace(/#.*$/, '');
+      hint.innerHTML = 'Overlay view (transparent). Open the <a target="_blank" rel="noopener">operator control panel</a> in another tab. This tip hides in 10 seconds.';
+      hint.querySelector('a').href = base + '#control';
+      document.body.appendChild(hint);
+      setTimeout(function () { hint.classList.add('gone'); }, 10000);
+    }
+  }
+
+  /* ===================================================================
+     OPERATOR CONTROL PANEL
+     =================================================================== */
+  function initControl() {
+    var root = document.getElementById('control');
+    var $ = function (id) { return document.getElementById(id); };
+    var state = parseState(readRaw());
+    var syncBadge = $('syncBadge'), toastEl = $('toast'), toastTimer = null, syncTimer = null;
+
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+    }
+
+    function save() {
+      state.rev = (state.rev || 0) + 1;
+      try {
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+        syncBadge.classList.add('pulse');
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(function () { syncBadge.classList.remove('pulse'); }, 180);
+      } catch (e) {
+        toast('Could not save to LocalStorage: ' + e.message);
+      }
+      render();
+    }
+
+    // ---- Build roster matrix and stat logger ----
+    function buildRoster(team, tableId) {
+      var tbl = $(tableId);
+      var html = '<thead><tr><th>JERSEY #</th><th>PLAYER NAME</th><th>POS</th></tr></thead><tbody>';
+      for (var i = 0; i < 5; i++) {
+        html += '<tr>' +
+          '<td><input class="inp" maxlength="3" data-bind="' + team + '.roster.' + i + '.num" aria-label="' + team + ' starter ' + (i + 1) + ' jersey"></td>' +
+          '<td><input class="inp" maxlength="28" data-bind="' + team + '.roster.' + i + '.name" aria-label="' + team + ' starter ' + (i + 1) + ' name"></td>' +
+          '<td><input class="inp" maxlength="3" data-type="upper" data-bind="' + team + '.roster.' + i + '.pos" aria-label="' + team + ' starter ' + (i + 1) + ' position"></td>' +
+          '</tr>';
+      }
+      tbl.innerHTML = html + '</tbody>';
+    }
+    buildRoster('home', 'rosterHome');
+    buildRoster('away', 'rosterAway');
+
+    var LOG_ROWS = [
+      { key: 'reb', label: 'REBOUNDS' },
+      { key: 'to', label: 'TURNOVERS' },
+      { key: 'stl', label: 'STEALS' },
+      { key: 'tpm', label: '3PT MADE' },
+      { key: 'ftm', label: 'FT MADE' },
+      { key: 'fta', label: 'FT ATTEMPTS' }
+    ];
+    var logger = $('statLogger');
+    logger.innerHTML = LOG_ROWS.map(function (r) {
+      function cell(team) {
+        return '<td><div class="stepper">' +
+          '<button class="btn" data-act="stat" data-team="' + team + '" data-key="' + r.key + '" data-n="-1" aria-label="minus">−</button>' +
+          '<b data-o="' + team + '.stats.' + r.key + '">0</b>' +
+          '<button class="btn" data-act="stat" data-team="' + team + '" data-key="' + r.key + '" data-n="1" aria-label="plus">+</button>' +
+          '</div></td>';
+      }
+      return '<tr><td>' + r.label + '</td>' + cell('home') + cell('away') + '</tr>';
+    }).join('');
+
+    // ---- Inputs ----
+    function populateInputs(force) {
+      root.querySelectorAll('[data-bind]').forEach(function (el) {
+        if (!force && el === document.activeElement) return;
+        var v = getPath(state, el.getAttribute('data-bind'));
+        if (el.type === 'checkbox') el.checked = !!v;
+        else if (el.value !== String(v == null ? '' : v)) el.value = v == null ? '' : v;
+      });
+    }
+    root.addEventListener('input', function (e) {
+      var el = e.target;
+      var path = el.getAttribute && el.getAttribute('data-bind');
+      if (!path) return;
+      var type = el.getAttribute('data-type');
+      var v;
+      if (type === 'bool') v = el.checked;
+      else if (type === 'int') { v = parseInt(el.value, 10); if (isNaN(v) || v < 1) return; }
+      else if (type === 'num') { v = parseFloat(el.value); if (isNaN(v) || v <= 0) return; }
+      else if (type === 'upper') { v = el.value.toUpperCase(); if (el.value !== v) { var p = el.selectionStart; el.value = v; el.setSelectionRange(p, p); } }
+      else v = el.value;
+      setPath(state, path, v);
+      save();
+      if (path === 'settings.preview') setupPreview();
+    });
+    root.addEventListener('change', function (e) {
+      var el = e.target;
+      var team = el.getAttribute && el.getAttribute('data-logo-input');
+      if (team && el.files && el.files[0]) loadLogo(team, el.files[0], el);
+    });
+
+    function loadLogo(team, file, inputEl) {
+      if (!/^image\//.test(file.type)) { toast('Please choose an image file (PNG recommended).'); return; }
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var max = 320, sc = Math.min(1, max / Math.max(img.width, img.height));
+          var c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * sc));
+          c.height = Math.max(1, Math.round(img.height * sc));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          var data = c.toDataURL('image/png');
+          try {
+            localStorage.setItem(LOGO_KEY[team], data);
+            toast(team.toUpperCase() + ' logo loaded.');
+          } catch (err) {
+            toast('Logo too large for LocalStorage. Try a smaller PNG.');
+          }
+          inputEl.value = '';
+          render();
+        };
+        img.onerror = function () { toast('That image could not be read.'); };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ---- Clock ----
+    function clockSet(ms, keepRunning) {
+      ms = Math.max(0, Math.round(ms));
+      var run = keepRunning && state.clock.running && ms > 0;
+      state.clock = { running: run, remainingMs: ms, startedAt: run ? Date.now() : 0 };
+      save();
+    }
+    function clockToggle() {
+      var c = state.clock;
+      if (c.running) state.clock = { running: false, remainingMs: clockRemaining(c), startedAt: 0 };
+      else {
+        if (c.remainingMs <= 0) { toast('Clock is at 0.0 — set a time or advance the period.'); return; }
+        state.clock = { running: true, remainingMs: c.remainingMs, startedAt: Date.now() };
+      }
+      save();
+    }
+    function parseClock(str) {
+      str = String(str || '').trim();
+      var m = /^(\d{1,2}):(\d{1,2}(?:\.\d+)?)$/.exec(str);
+      if (m) return (parseInt(m[1], 10) * 60 + parseFloat(m[2])) * 1000;
+      m = /^(\d{1,4}(?:\.\d+)?)$/.exec(str);
+      if (m) return parseFloat(m[1]) * 1000;
+      return null;
+    }
+    function doClockSet() {
+      var input = $('clockInput');
+      var ms = parseClock(input.value);
+      if (ms === null) { toast('Use MM:SS (e.g. 5:30) or seconds (e.g. 42.5).'); input.focus(); return; }
+      clockSet(ms, true);
+      input.value = '';
+      input.blur();
+      toast('Clock set to ' + fmtClock(ms));
+    }
+    $('clockInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); doClockSet(); }
+      if (e.key === 'Escape') { this.value = ''; this.blur(); }
+    });
+
+    // ---- Actions ----
+    function act(d) {
+      var t = d.team, n = parseFloat(d.n);
+      switch (d.act) {
+        case 'score': {
+          var team = state[t];
+          if (n < 0 && team.score <= 0) return;
+          team.score = Math.max(0, team.score + n);
+          if (n === 3) { team.stats.tpm += 1; state.flash = { id: Date.now(), team: t }; }
+          if (n === 1 && state.settings.ftAuto) { team.stats.ftm += 1; team.stats.fta += 1; }
+          break;
+        }
+        case 'ftMiss': state[t].stats.fta += 1; break;
+        case 'foul': state[t].fouls = Math.max(0, state[t].fouls + n); break;
+        case 'stat': {
+          var st = state[t].stats, k = d.key;
+          st[k] = Math.max(0, st[k] + n);
+          if (k === 'ftm' && st.ftm > st.fta) st.fta = st.ftm;
+          if (k === 'fta' && st.fta < st.ftm) st.ftm = st.fta;
+          break;
+        }
+        case 'period': {
+          var np = Math.max(1, state.period + n);
+          if (np === state.period) return;
+          state.period = np;
+          if (n > 0) {
+            state.clock = { running: false, remainingMs: periodLengthMs(state), startedAt: 0 };
+            if (state.settings.resetFouls) { state.home.fouls = 0; state.away.fouls = 0; }
+            toast('Now: ' + periodLong(state));
+          }
+          break;
+        }
+        case 'clockToggle': clockToggle(); return;
+        case 'clockAdj': clockSet(clockRemaining(state.clock) + n * 1000, true); return;
+        case 'clockSet': doClockSet(); return;
+        case 'clockReset': clockSet(periodLengthMs(state), false); return;
+        case 'lineup': state.show.lineup = state.show.lineup === t ? null : t; break;
+        case 'stats': state.show.stats = !state.show.stats; break;
+        case 'bug': state.show.bug = !state.show.bug; break;
+        case 'flashTest': state.flash = { id: Date.now(), team: t }; break;
+        case 'clearPopups': state.show.lineup = null; state.show.stats = false; break;
+        case 'clearLogo':
+          try { localStorage.removeItem(LOGO_KEY[t]); } catch (e) {}
+          toast(t.toUpperCase() + ' logo cleared.');
+          break;
+        case 'openOverlay':
+          window.open(location.href.replace(/#.*$/, '') + '#overlay', 'hoopscast_overlay', 'width=1280,height=720');
+          return;
+        case 'resetGame': {
+          if (!confirm('Reset scores, fouls, stats, period and clock? Team names, colors, logos and rosters are kept.')) return;
+          TEAMS.forEach(function (x) { state[x].score = 0; state[x].fouls = 0; state[x].stats = emptyStats(); });
+          state.period = 1;
+          state.clock = { running: false, remainingMs: periodLengthMs(state), startedAt: 0 };
+          state.show.lineup = null; state.show.stats = false; state.show.bug = true;
+          toast('Game reset.');
+          break;
+        }
+        default: return;
+      }
+      save();
+    }
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]');
+      if (!b || !root.contains(b)) return;
+      act(b.dataset);
+    });
+
+    // ---- Spacebar → clock toggle (ignored while typing in a text field) ----
+    document.addEventListener('keydown', function (e) {
+      if (e.code !== 'Space' && e.key !== ' ') return;
+      var a = document.activeElement;
+      var typing = a && (a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.isContentEditable ||
+        (a.tagName === 'INPUT' && !/^(button|checkbox|radio|color|file|submit|reset|range)$/i.test(a.type)));
+      if (typing) return;
+      e.preventDefault();
+      if (e.repeat) return;
+      if (a && a.blur && a !== document.body) a.blur();
+      clockToggle();
+    });
+    // Stop the browser from also "clicking" a focused button on Space keyup.
+    document.addEventListener('keyup', function (e) {
+      if ((e.code === 'Space' || e.key === ' ') && document.activeElement && document.activeElement.tagName === 'BUTTON') e.preventDefault();
+    });
+
+    // ---- Render ----
+    var lastShownSettingsPreview = null;
+    function setupPreview() {
+      var on = !!state.settings.preview;
+      if (on === lastShownSettingsPreview) return;
+      lastShownSettingsPreview = on;
+      var fr = $('previewFrame');
+      var card = fr.closest('.card');
+      card.style.display = on ? '' : 'none';
+      if (on) fr.src = location.href.replace(/#.*$/, '') + '#overlay';
+      else fr.removeAttribute('src');
+    }
+
+    function render() {
+      applyTheme(state);
+      renderOutputs(root, state);
+      setText($('cpPeriod'), periodLong(state));
+      $('cpBonusHome').classList.toggle('on', state.away.fouls >= state.settings.bonusAt);
+      $('cpBonusAway').classList.toggle('on', state.home.fouls >= state.settings.bonusAt);
+      var lh = $('tgLuHome'), la = $('tgLuAway'), ts = $('tgStats'), tb = $('tgBug');
+      lh.classList.toggle('on', state.show.lineup === 'home');
+      la.classList.toggle('on', state.show.lineup === 'away');
+      setText(lh, state.show.lineup === 'home' ? 'HIDE HOME' : 'SHOW HOME');
+      setText(la, state.show.lineup === 'away' ? 'HIDE AWAY' : 'SHOW AWAY');
+      ts.classList.toggle('on', !!state.show.stats);
+      setText(ts, state.show.stats ? 'HIDE STATS' : 'SHOW STATS');
+      tb.classList.toggle('on', !state.show.bug);
+      setText(tb, state.show.bug ? 'HIDE SCOREBUG' : 'SHOW SCOREBUG');
+      document.title = (state.home.abbr || 'HOME') + ' ' + state.home.score + ' – ' + state.away.score + ' ' + (state.away.abbr || 'AWAY') + ' · HoopsCast Control';
+    }
+
+    var clockEl = $('cpClock'), clockBtn = $('clockBtn');
+    var lastTxt = '', lastRun = null;
+    function clockLoop() {
+      var c = state.clock;
+      var ms = clockRemaining(c);
+      if (c.running && ms <= 0) {
+        state.clock = { running: false, remainingMs: 0, startedAt: 0 };
+        save();
+        toast('END OF ' + periodLong(state));
+      }
+      var txt = fmtClock(ms);
+      if (txt !== lastTxt) { clockEl.textContent = txt; lastTxt = txt; }
+      if (lastRun !== state.clock.running) {
+        lastRun = state.clock.running;
+        clockEl.classList.toggle('running', lastRun);
+        clockBtn.classList.toggle('running', lastRun);
+        clockBtn.innerHTML = (lastRun ? 'STOP CLOCK' : 'START CLOCK') + '<small>PRESS SPACEBAR</small>';
+      }
+      clockEl.classList.toggle('zero', !state.clock.running && ms <= 0);
+      requestAnimationFrame(clockLoop);
+    }
+
+    // Keep multiple control windows consistent.
+    window.addEventListener('storage', function (e) {
+      if (e.key === STATE_KEY || e.key === null) { state = parseState(readRaw()); populateInputs(false); render(); }
+      if (e.key === LOGO_KEY.home || e.key === LOGO_KEY.away) render();
+    });
+
+    // First save writes defaults so the overlay has data even before any button is pressed.
+    if (!readRaw()) { try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch (e) {} }
+    populateInputs(true);
+    render();
+    setupPreview();
+    clockLoop();
+  }
+})();
+</script>
+</body>
+</html>
