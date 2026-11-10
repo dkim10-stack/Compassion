@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <!--
-  HOOPSCAST — High School Basketball Broadcast Graphics (single-file, 1920x1080)
+  YISSPN LIVE — High School Basketball Broadcast Graphics (single-file, 1920x1080)
 
   HOW TO USE
   1) OVERLAY (what viewers see): open this file with no hash, or with #overlay.
        OBS: Add "Browser" source -> check "Local file" -> pick this file -> Width 1920, Height 1080.
   2) CONTROL PANEL (operator switchboard): open this file with #control appended.
-       Best in OBS: Docks -> Custom Browser Docks -> URL: file:///C:/path/to/hoops-broadcast.html#control
+       Best in OBS: Docks -> Custom Browser Docks -> URL: file:///C:/path/to/yisspn-live.html#control
        (A custom dock shares OBS's browser storage with the Browser source, so they sync instantly.)
        Alternative: open BOTH views as two tabs/windows of the same desktop browser (Chrome/Edge)
        and capture the overlay window in OBS.
@@ -17,7 +17,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HoopsCast Broadcast Graphics</title>
+<title>YISSPN Live</title>
 <style>
 /* =====================================================================
    SHARED TOKENS
@@ -437,7 +437,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
      ===================================================================== -->
 <div id="control" class="cp">
   <header class="cp-top">
-    <div class="brand"><span class="dot"></span>HOOPS<b>CAST</b><small>OPERATOR SWITCHBOARD</small></div>
+    <div class="brand"><span class="dot"></span>YISSPN <b>LIVE</b><small>OPERATOR SWITCHBOARD</small></div>
     <div class="top-actions">
       <span class="sync" id="syncBadge">● LIVE SYNC</span>
       <button class="btn sm" data-act="openOverlay">OPEN OVERLAY WINDOW</button>
@@ -1208,7 +1208,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           toast(t.toUpperCase() + ' logo cleared.');
           break;
         case 'openOverlay':
-          window.open(location.href.replace(/#.*$/, '') + '#overlay', 'hoopscast_overlay', 'width=1280,height=720');
+          window.open(location.href.replace(/#.*$/, '') + '#overlay', 'yisspn_overlay', 'width=1280,height=720');
           return;
         case 'resetGame': {
           if (!confirm('Reset scores, fouls, stats, period and clock? Team names, colors, logos and rosters are kept.')) return;
@@ -1274,7 +1274,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       setText(ts, state.show.stats ? 'HIDE STATS' : 'SHOW STATS');
       tb.classList.toggle('on', !state.show.bug);
       setText(tb, state.show.bug ? 'HIDE SCOREBUG' : 'SHOW SCOREBUG');
-      document.title = (state.home.abbr || 'HOME') + ' ' + state.home.score + ' – ' + state.away.score + ' ' + (state.away.abbr || 'AWAY') + ' · HoopsCast Control';
+      document.title = (state.home.abbr || 'HOME') + ' ' + state.home.score + ' – ' + state.away.score + ' ' + (state.away.abbr || 'AWAY') + ' · YISSPN Live Control';
     }
 
     var clockEl = $('cpClock'), clockBtn = $('clockBtn');
