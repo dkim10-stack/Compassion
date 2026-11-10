@@ -5,11 +5,13 @@
   HOW TO USE
   1) OVERLAY (what viewers see): open this file with no hash, or with #overlay.
        OBS: Add "Browser" source -> check "Local file" -> pick this file -> Width 1920, Height 1080.
-  2) CONTROL PANEL (operator switchboard): open this file with #control appended.
-       Best in OBS: Docks -> Custom Browser Docks -> URL: file:///C:/path/to/yisspn-live.html#control
-       (A custom dock shares OBS's browser storage with the Browser source, so they sync instantly.)
-       Alternative: open BOTH views as two tabs/windows of the same desktop browser (Chrome/Edge)
-       and capture the overlay window in OBS.
+  2) CONTROL PANEL (operator switchboard), inside OBS:
+       Make a scene called "Control Panel" (never put it on air). Add a second "Browser" source to it:
+       check "Local file", pick this same file, Width 1280, Height 900, and in "Custom CSS" add the line
+           :root{--yisspn-mode:control}
+       Then right-click that source -> "Interact" to open the control panel in its own window.
+     Or, in a desktop browser: open this file with #control appended (e.g. file:///C:/Broadcast/yisspn-live.html#control).
+     Both views must run in the same program (both in OBS, or both in the same browser) to share storage.
   The two views sync in real time through the browser's LocalStorage API.
   SPACEBAR starts/stops the game clock while the control panel has focus.
 -->
@@ -37,7 +39,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 html.mode-overlay,html.mode-overlay body{background:transparent;overflow:hidden}
-html.mode-control body{background:#070a12}
+html.mode-control,html.mode-control body{overflow:auto!important;height:auto!important;margin:0!important}
+html.mode-control body{background:#070a12!important}
 html.mode-overlay #control{display:none}
 html.mode-control #overlay{display:none}
 
@@ -631,7 +634,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
         <label class="check"><input type="checkbox" data-bind="settings.preview" data-type="bool"> Show live program preview in this panel</label>
       </div>
       <p class="note">Rules default to NFHS: four 8:00 quarters, 4:00 overtime, bonus on the 5th team foul of each quarter. Changing period length applies the next time you press <b>FULL PERIOD</b> or <b>NEXT PERIOD</b>.</p>
-      <p class="note"><b>Setup:</b> overlay = this file (no hash) as an OBS Browser Source. Control panel = this file + <code>#control</code>, ideally as an OBS Custom Browser Dock so both share the same storage.</p>
+      <p class="note"><b>OBS setup:</b> overlay = this file as a Browser source (1920×1080). Control panel = a second Browser source of this file in an off-air scene, with <code>:root{--yisspn-mode:control}</code> in its Custom CSS; right-click it → <b>Interact</b> to operate.</p>
     </section>
 
   </main>
@@ -989,6 +992,20 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     })();
 
     render(state, true);
+
+    // OBS: a Browser source whose Custom CSS contains ":root{--yisspn-mode:control}" becomes the control panel.
+    // OBS injects Custom CSS just after the page loads, so check for it during the first few seconds.
+    if (!/overlay/i.test(location.hash)) {
+      var cssChecks = 0;
+      var cssTimer = setInterval(function () {
+        var m = getComputedStyle(document.documentElement).getPropertyValue('--yisspn-mode').trim().toLowerCase();
+        if (m === 'control') {
+          clearInterval(cssTimer);
+          location.hash = 'control';
+          location.reload();
+        } else if (++cssChecks > 40) clearInterval(cssTimer);
+      }, 250);
+    }
 
     // Helper hint only when opened directly in a regular browser tab (never inside OBS or the preview frame).
     if (!window.obsstudio && window.self === window.top) {
