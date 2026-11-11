@@ -133,6 +133,25 @@ html.mode-control #overlay{display:none}
 @keyframes subIn{0%,12%{transform:translateY(30px);opacity:0}20%{transform:translateY(0);opacity:1}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(20px)}}
 @keyframes streak{0%{opacity:0;transform:translateX(0)}20%{opacity:1}100%{opacity:0;transform:translateX(3000px)}}
 
+/* ---------- STAT POP-UP (right of the scorebug) ---------- */
+.pop{position:absolute;left:512px;top:40px;width:330px;height:126px;display:flex;flex-direction:column;
+  font-family:var(--bug-font);font-stretch:expanded;font-weight:700;color:#fff;
+  background:rgba(10,12,18,.92);box-shadow:0 10px 30px rgba(0,0,0,.45);
+  opacity:0;transform:translateX(-40px);clip-path:inset(0 100% 0 0);
+  transition:opacity .35s ease,transform .55s var(--ease-out),clip-path .55s var(--ease-out)}
+.pop.show{opacity:1;transform:none;clip-path:inset(0 -40px -40px 0)}
+.pop-lbl{flex:none;height:38px;display:flex;align-items:center;justify-content:center;background:#161a24;
+  font-size:16px;letter-spacing:1px;white-space:nowrap;padding:0 12px}
+.pop-vals{flex:1;display:grid;grid-template-columns:1fr 1fr}
+.pop-team{display:flex;align-items:center;justify-content:center;gap:12px;border-top:4px solid var(--c);min-width:0}
+.pop-team+.pop-team{border-left:2px solid rgba(255,255,255,.08)}
+.pop-team .ab{font-size:18px}
+.pop-team .vv{display:flex;flex-direction:column;align-items:center;gap:3px}
+.pop-team .v{display:inline-block;min-width:52px;padding:6px 9px;text-align:center;font-size:30px;line-height:1;white-space:nowrap;background:transparent;transition:background-color .4s}
+.pop-team.lead .v{background:var(--c)}
+.pop-team small{font-size:11px;line-height:1}
+.pop-team small:empty{display:none}
+
 /* ---------- MODULE 3: LINEUP BAR (bottom of screen) ---------- */
 .lineup{position:absolute;left:230px;width:1460px;bottom:40px;height:255px;display:flex;gap:6px;
   font-family:var(--bug-font);font-stretch:expanded;font-weight:700;color:#fff;
@@ -318,6 +337,14 @@ input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 @media (max-width:760px){.trig{grid-template-columns:1fr}}
 
 .logger-card{padding:8px 12px}
+.pop-card{display:flex;align-items:center;gap:10px;padding:10px 12px;flex-wrap:wrap}
+.pop-card>.lbl{white-space:nowrap}
+.pop-btns{flex:1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;min-width:0}
+.pop-btns .btn{padding:11px 4px;font-size:12px;position:relative;overflow:hidden}
+.pop-btns .btn .cd{position:absolute;left:0;bottom:0;height:3px;background:#111;transform-origin:left center}
+.pop-dur{display:flex;align-items:center;gap:6px}
+.pop-dur select{width:auto;padding:8px 6px}
+@media (max-width:1000px){.pop-btns{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .stat-table{width:100%;border-collapse:separate;border-spacing:0 5px;min-width:760px}
 .stat-table th{font-family:var(--heavy);font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:center;padding-bottom:2px}
 .stat-table th:first-child{text-align:left}
@@ -422,6 +449,15 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       <div class="streak s2"></div>
       <div class="txt">3-POINTER!</div>
       <div class="sub"><span id="flashSub">HOME +3</span></div>
+    </div>
+
+    <!-- STAT POP-UP -->
+    <div class="pop" id="pop">
+      <div class="pop-lbl" id="popLbl">REBOUNDS</div>
+      <div class="pop-vals">
+        <div class="pop-team t-home" id="popHome"><span class="ab" data-o="home.abbr"></span><div class="vv"><span class="v"></span><small></small></div></div>
+        <div class="pop-team t-away" id="popAway"><span class="ab" data-o="away.abbr"></span><div class="vv"><span class="v"></span><small></small></div></div>
+      </div>
     </div>
 
     <!-- MODULE 3: LINEUP BAR -->
@@ -567,6 +603,19 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
         <span class="lbl">PANIC</span>
         <div class="btns one"><button class="btn danger" data-act="clearPopups">CLEAR POP-UPS</button></div>
       </div>
+    </section>
+
+    <!-- STAT POP-UP CONTROLS -->
+    <section class="card span-3 pop-card">
+      <span class="lbl">STAT POP-UP</span>
+      <div class="pop-btns" id="popBtns"></div>
+      <label class="pop-dur"><span class="lbl">SHOW FOR</span>
+        <select class="inp" data-bind="settings.popSecs" data-type="int" aria-label="Pop-up duration in seconds">
+          <option value="5">5 sec</option><option value="8">8 sec</option><option value="10">10 sec</option>
+          <option value="15">15 sec</option><option value="20">20 sec</option><option value="30">30 sec</option>
+        </select>
+      </label>
+      <button class="btn danger" data-act="popHide">HIDE</button>
     </section>
 
     <!-- LIVE STAT LOGGER -->
@@ -720,7 +769,8 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       clock: { running: false, remainingMs: 8 * 60000, startedAt: 0 },
       show: { bug: true, lineup: null, stats: false },
       flash: { id: 0, team: 'home' },
-      settings: { label: 'KAIAC Conference', periods: 4, periodMin: 8, otMin: 4, bonusAt: 5, resetFouls: true, ftAuto: true, preview: true }
+      pop: { id: 0, key: null, secs: 8 },
+      settings: { label: 'KAIAC Conference', popSecs: 8, periods: 4, periodMin: 8, otMin: 4, bonusAt: 5, resetFouls: true, ftAuto: true, preview: true }
     };
   }
 
@@ -1012,9 +1062,44 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       stats.classList.toggle('show', !!s.show.stats);
       renderStats(s);
       updateLineup(s);
+      updatePop(s, first);
       if (s.flash.id !== lastFlashId) {
         lastFlashId = s.flash.id;
         if (!first && Date.now() - s.flash.id < 5000) playFlash(s.flash.team === 'away' ? 'away' : 'home', s);
+      }
+    }
+
+    // ---- Stat pop-up: shows one head-to-head stat beside the scorebug, then hides itself ----
+    var pop = $('pop'), popTimer = null, lastPopId = null;
+    var popEls = { home: $('popHome'), away: $('popAway') };
+    function fillPop(s) {
+      var row = null;
+      STAT_ROWS.forEach(function (r) { if (r.key === s.pop.key) row = r; });
+      if (!row) return;
+      setText($('popLbl'), row.label);
+      var h = statValue(s, 'home', row.key), a = statValue(s, 'away', row.key);
+      var better = row.lowerBetter ? (h.n < a.n ? 'home' : a.n < h.n ? 'away' : '') : (h.n > a.n ? 'home' : a.n > h.n ? 'away' : '');
+      [['home', h], ['away', a]].forEach(function (pair) {
+        var el = popEls[pair[0]];
+        setText(el.querySelector('.v'), pair[1].txt);
+        setText(el.querySelector('small'), pair[1].small || '');
+        el.classList.toggle('lead', better === pair[0]);
+      });
+      var bugBox = bug.querySelector('.bug');
+      pop.style.left = (bug.offsetLeft + bugBox.offsetWidth + 10) + 'px';
+    }
+    function updatePop(s, first) {
+      var p = s.pop || {};
+      if (p.id === lastPopId) { if (pop.classList.contains('show')) fillPop(s); return; }
+      lastPopId = p.id;
+      clearTimeout(popTimer);
+      var remaining = (p.secs || 0) * 1000 - (Date.now() - p.id);
+      if (p.key && remaining > 300) {
+        fillPop(s);
+        pop.classList.add('show');
+        popTimer = setTimeout(function () { pop.classList.remove('show'); }, remaining);
+      } else {
+        pop.classList.remove('show');
       }
     }
 
@@ -1150,6 +1235,25 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           '</div></td>';
       }).join('') + '</tr>';
     }).join('');
+
+    // ---- Stat pop-up buttons ----
+    $('popBtns').innerHTML = STAT_ROWS.map(function (r) {
+      return '<button class="btn" data-act="pop" data-key="' + r.key + '">' + r.label + '<i class="cd"></i></button>';
+    }).join('');
+    function popActive() {
+      var p = state.pop || {};
+      return p.key && (Date.now() - p.id) < (p.secs || 0) * 1000 ? p : null;
+    }
+    function renderPopBtns() {
+      var p = popActive();
+      root.querySelectorAll('[data-act=pop]').forEach(function (b) {
+        var on = !!p && b.getAttribute('data-key') === p.key;
+        b.classList.toggle('on', on);
+        var cd = b.querySelector('.cd');
+        cd.style.transform = on ? 'scaleX(' + Math.max(0, 1 - (Date.now() - p.id) / (p.secs * 1000)) + ')' : 'scaleX(0)';
+      });
+    }
+    setInterval(renderPopBtns, 100);
 
     // ---- Tabs and scrolling (scroll buttons work even where the mouse wheel does not, e.g. OBS Interact) ----
     var scroller = $('cpScroll'), scrollBtns = $('scrollBtns');
@@ -1369,7 +1473,14 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
         case 'stats': state.show.stats = !state.show.stats; break;
         case 'bug': state.show.bug = !state.show.bug; break;
         case 'flashTest': state.flash = { id: Date.now(), team: t }; break;
-        case 'clearPopups': state.show.lineup = null; state.show.stats = false; break;
+        case 'clearPopups': state.show.lineup = null; state.show.stats = false; state.pop = { id: Date.now(), key: null, secs: 0 }; break;
+        case 'pop': {
+          var cur = popActive();
+          if (cur && cur.key === d.key) state.pop = { id: Date.now(), key: null, secs: 0 };
+          else state.pop = { id: Date.now(), key: d.key, secs: state.settings.popSecs || 8 };
+          break;
+        }
+        case 'popHide': state.pop = { id: Date.now(), key: null, secs: 0 }; break;
         case 'clearLogo':
           try { localStorage.removeItem(LOGO_KEY[t]); } catch (e) {}
           toast(t.toUpperCase() + ' logo cleared.');
@@ -1391,6 +1502,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           state.period = 1;
           state.clock = { running: false, remainingMs: periodLengthMs(state), startedAt: 0 };
           state.show.lineup = null; state.show.stats = false; state.show.bug = true;
+          state.pop = { id: Date.now(), key: null, secs: 0 };
           toast('Game reset.');
           break;
         }
