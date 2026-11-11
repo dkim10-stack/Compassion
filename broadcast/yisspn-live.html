@@ -62,10 +62,14 @@ html.mode-control #overlay{display:none}
 .t-away{--c:var(--away);--c-rgb:var(--away-rgb);--c-ink:var(--away-ink)}
 
 /* ---------- MODULE 1: SCOREBUG (square corners, flat colors, Helvetica Extended) ---------- */
-.bug{position:absolute;left:48px;top:40px;display:flex;border-radius:0;overflow:hidden;background:rgba(10,12,18,.92);
-  box-shadow:0 10px 30px rgba(0,0,0,.45);font-family:var(--bug-font);font-stretch:expanded;font-weight:700;
+.bug-wrap{position:absolute;left:48px;top:40px;display:flex;flex-direction:column;align-items:center;
+  font-family:var(--bug-font);font-stretch:expanded;font-weight:700;
   transition:transform .7s var(--ease-out),opacity .5s ease}
-.bug.off{transform:translateX(-115%);opacity:0}
+.bug-wrap.off{transform:translateX(-115%);opacity:0}
+.bug{display:flex;border-radius:0;overflow:hidden;background:rgba(10,12,18,.92);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.bug-tab{background:#161a24;color:#fff;font-size:12px;line-height:1;letter-spacing:1px;padding:7px 20px;border-radius:0;
+  white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.bug-tab:empty{display:none}
 .bug-teams{display:flex;flex-direction:column}
 .bug-row{position:relative;display:flex;align-items:center;height:62px;overflow:hidden}
 .bug-row+.bug-row{border-top:2px solid rgba(255,255,255,.08)}
@@ -98,9 +102,6 @@ html.mode-control #overlay{display:none}
   font-variant-numeric:tabular-nums;transition:color .3s}
 .bug-clock.under{color:var(--accent)}
 .bug-clock.stopped{opacity:.92}
-.bug-run{width:46px;height:4px;border-radius:0;background:rgba(255,255,255,.18);overflow:hidden}
-.bug-run i{display:block;height:100%;width:100%;background:#2bff88;transform:scaleX(0);transition:transform .3s}
-.bug-run.on i{transform:scaleX(1)}
 
 /* ---------- MODULE 2: THREE-POINT FLASH ---------- */
 .flash{position:absolute;left:0;top:360px;width:1920px;height:360px;display:none;--f:var(--accent);--f-rgb:var(--accent-rgb)}
@@ -374,7 +375,8 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
   <div class="stage" id="stage">
 
     <!-- MODULE 1: SCOREBUG -->
-    <div class="bug" id="bug">
+    <div class="bug-wrap" id="bug">
+    <div class="bug">
       <div class="bug-teams">
         <div class="bug-row t-home">
           <div class="strip"></div>
@@ -400,8 +402,9 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       <div class="bug-side">
         <div class="bug-period" id="bugPeriod">1ST</div>
         <div class="bug-clock" id="bugClock">8:00</div>
-        <div class="bug-run" id="bugRun"><i></i></div>
       </div>
+    </div>
+    <div class="bug-tab" data-o="settings.label"></div>
     </div>
 
     <!-- MODULE 2: THREE-POINT FLASH -->
@@ -621,6 +624,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     <section class="card">
       <h3>PRE-GAME CONFIG · BROADCAST &amp; RULES</h3>
       <div class="grid2">
+        <div class="field" style="grid-column:1/-1"><label>LABEL UNDER SCOREBOARD (LEAVE EMPTY TO HIDE)</label><input class="inp" maxlength="40" data-bind="settings.label"></div>
         <div class="field"><label>BROADCAST ACCENT COLOR</label><input type="color" class="inp" data-bind="accent"></div>
         <div class="field"><label>PERIODS IN REGULATION</label><input type="number" class="inp" min="1" max="8" data-bind="settings.periods" data-type="int"></div>
         <div class="field"><label>PERIOD LENGTH (MIN)</label><input type="number" class="inp" min="1" max="60" step="0.5" data-bind="settings.periodMin" data-type="num"></div>
@@ -715,7 +719,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       clock: { running: false, remainingMs: 8 * 60000, startedAt: 0 },
       show: { bug: true, lineup: null, stats: false },
       flash: { id: 0, team: 'home' },
-      settings: { periods: 4, periodMin: 8, otMin: 4, bonusAt: 5, resetFouls: true, ftAuto: true, preview: true }
+      settings: { label: 'KAIAC Conference', periods: 4, periodMin: 8, otMin: 4, bonusAt: 5, resetFouls: true, ftAuto: true, preview: true }
     };
   }
 
@@ -854,7 +858,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     var stage = document.getElementById('stage');
     var $ = function (id) { return document.getElementById(id); };
     var bug = $('bug'), flash = $('flash'), lineup = $('lineup'), stats = $('stats');
-    var bugClock = $('bugClock'), bugRun = $('bugRun'), bugPeriod = $('bugPeriod');
+    var bugClock = $('bugClock'), bugPeriod = $('bugPeriod');
     var scoreEl = { home: $('scoreHome'), away: $('scoreAway') };
     var sweepEl = { home: $('sweepHome'), away: $('sweepAway') };
     var bonusEl = { home: $('bonusHome'), away: $('bonusAway') };
@@ -1020,7 +1024,6 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       if (txt !== lastClockTxt) { bugClock.textContent = txt; lastClockTxt = txt; }
       bugClock.classList.toggle('under', ms < 60000);
       bugClock.classList.toggle('stopped', !state.clock.running);
-      bugRun.classList.toggle('on', state.clock.running && ms > 0);
       requestAnimationFrame(tick);
     })();
 
