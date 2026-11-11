@@ -133,43 +133,37 @@ html.mode-control #overlay{display:none}
 @keyframes subIn{0%,12%{transform:translateY(30px);opacity:0}20%{transform:translateY(0);opacity:1}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(20px)}}
 @keyframes streak{0%{opacity:0;transform:translateX(0)}20%{opacity:1}100%{opacity:0;transform:translateX(3000px)}}
 
-/* ---------- MODULE 3: STARTING LINEUP CARD ---------- */
-.lineup{position:absolute;left:240px;top:205px;width:1440px;height:760px;display:grid;grid-template-columns:500px 1fr;
-  border-radius:22px;overflow:hidden;background:var(--glass-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.1),0 0 60px rgba(var(--c-rgb),.35);
-  opacity:0;transform:translateY(60px) scale(.96);transition:opacity .55s ease,transform .7s var(--ease-out)}
-.lineup.show{opacity:1;transform:none}
-.lu-side{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;
-  background:var(--c);overflow:hidden}
-.lu-side>*{position:relative}
-.lu-side .logo{width:250px;height:250px;margin-bottom:26px;transform:scale(.6) rotate(-12deg);opacity:0;transition:transform .8s .15s var(--ease-out),opacity .5s .15s}
-.lu-side .logo .mono{font-size:90px;background:rgba(8,12,22,.55);color:#fff}
-.lineup.show .lu-side .logo{transform:none;opacity:1}
-.lu-kicker{font-family:var(--heavy);font-size:22px;letter-spacing:8px;color:var(--accent);text-shadow:0 2px 8px rgba(0,0,0,.4)}
-.lu-team{font-family:var(--display);font-size:66px;line-height:1.02;margin:10px 0 0;color:#fff;text-shadow:0 4px 14px rgba(0,0,0,.45);text-transform:uppercase}
-.lu-coach{margin-top:auto;width:100%;padding-top:22px;border-top:2px solid rgba(255,255,255,.3)}
-.lu-coach small{display:block;font-family:var(--heavy);font-size:16px;letter-spacing:5px;color:rgba(255,255,255,.8)}
-.lu-coach b{display:block;font-family:var(--display);font-size:40px;font-weight:normal;letter-spacing:1px;margin-top:4px;text-transform:uppercase}
-.lu-main{display:flex;flex-direction:column;padding:36px 48px 40px}
-.lu-head{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid rgba(var(--c-rgb),.9);margin-bottom:12px}
-.lu-head h2{font-family:var(--display);font-weight:normal;font-size:58px;letter-spacing:3px}
-.lu-head h2 em{font-style:normal;color:var(--accent);text-shadow:0 0 16px rgba(var(--accent-rgb),.6)}
-.lu-head span{font-family:var(--heavy);font-size:18px;letter-spacing:4px;color:rgba(255,255,255,.6)}
-.lu-rows{flex:1;display:flex;flex-direction:column;justify-content:space-around}
-.lu-row{display:flex;align-items:center;gap:28px;height:104px;padding-right:20px;border-radius:12px;
-  background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
-  opacity:0;transform:translateX(80px);transition:opacity .45s ease,transform .6s var(--ease-out)}
-.lineup.show .lu-row{opacity:1;transform:none}
-.lineup.show .lu-row:nth-child(1){transition-delay:.25s}
-.lineup.show .lu-row:nth-child(2){transition-delay:.33s}
-.lineup.show .lu-row:nth-child(3){transition-delay:.41s}
-.lineup.show .lu-row:nth-child(4){transition-delay:.49s}
-.lineup.show .lu-row:nth-child(5){transition-delay:.57s}
-.lu-num{width:120px;height:100%;display:grid;place-items:center;border-radius:12px 0 0 12px;
-  font-family:var(--display);font-size:64px;background:var(--c);color:var(--c-ink);box-shadow:0 0 24px rgba(var(--c-rgb),.6)}
-.lu-name{flex:1;font-family:var(--display);font-size:60px;line-height:1;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lu-pos{min-width:84px;text-align:center;font-family:var(--heavy);font-size:24px;letter-spacing:3px;padding:8px 14px;border-radius:8px;
-  border:2px solid var(--accent);color:var(--accent);text-transform:uppercase}
+/* ---------- MODULE 3: LINEUP BAR (bottom of screen) ---------- */
+.lineup{position:absolute;left:48px;right:48px;bottom:40px;height:340px;display:flex;gap:6px;
+  font-family:var(--bug-font);font-stretch:expanded;font-weight:700;color:#fff;
+  transform:translateY(420px);transition:transform .7s var(--ease-out)}
+.lineup.show{transform:none}
+.lu-title{flex:none;width:290px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+  background:var(--c);color:var(--c-ink);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.lu-title .logo{width:150px;height:150px;border-radius:0}
+.lu-title .logo .mono{border-radius:0;font-family:var(--bug-font);font-stretch:expanded;font-weight:700;font-size:40px;background:rgba(0,0,0,.25);color:#fff}
+.lu-word{font-size:40px;line-height:1;letter-spacing:2px}
+.lu-players{flex:1;min-width:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.lu-card{display:flex;flex-direction:column;min-width:0;background:rgba(10,12,18,.94);box-shadow:0 10px 30px rgba(0,0,0,.45);
+  opacity:0;transform:translateY(40px);transition:opacity .4s ease,transform .55s var(--ease-out)}
+.lineup.show .lu-card{opacity:1;transform:none}
+.lineup.show .lu-card:nth-child(1){transition-delay:.2s}
+.lineup.show .lu-card:nth-child(2){transition-delay:.27s}
+.lineup.show .lu-card:nth-child(3){transition-delay:.34s}
+.lineup.show .lu-card:nth-child(4){transition-delay:.41s}
+.lineup.show .lu-card:nth-child(5){transition-delay:.48s}
+.lu-photo{position:relative;flex:1;overflow:hidden;background:#1f2430}
+.lu-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:none}
+.lu-photo.has-img img{display:block}
+.lu-photo svg{position:absolute;left:50%;bottom:0;height:82%;transform:translateX(-50%);fill:#2e3544}
+.lu-photo.has-img svg{display:none}
+.lu-tag{position:absolute;left:0;top:0;min-width:70px;padding:9px 12px 8px;display:flex;flex-direction:column;align-items:center;
+  background:var(--c);color:var(--c-ink)}
+.lu-tag .num{font-size:34px;line-height:1}
+.lu-tag .pos{font-size:13px;line-height:1;letter-spacing:1px;margin-top:5px}
+.lu-name{flex:none;height:64px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-top:4px solid var(--c);
+  text-transform:uppercase;text-align:center;overflow:hidden}
+.lu-name span{display:block;max-width:100%;white-space:nowrap;font-size:22px;line-height:1.1;overflow-wrap:anywhere}
 
 /* ---------- MODULE 4: LIVE STATS SIDEBAR ---------- */
 .stats{position:absolute;right:48px;top:150px;width:580px;border-radius:18px;overflow:hidden;
@@ -356,8 +350,19 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
 .roster{width:100%;border-collapse:collapse}
 .roster th{font-family:var(--heavy);font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:left;padding:4px 4px}
 .roster td{padding:3px 4px}
-.roster td:first-child{width:70px}
-.roster td:last-child{width:80px}
+.roster td:first-child{width:58px}
+.roster td.pos-cell{width:64px}
+.roster td.ph{width:62px;white-space:nowrap}
+.ph-btn{position:relative;display:inline-grid;place-items:center;width:34px;height:40px;vertical-align:middle;cursor:pointer;
+  background:rgba(0,0,0,.35);border:1px dashed rgba(255,255,255,.3);color:#8b95ab;font-size:18px;overflow:hidden}
+.ph-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ph-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:none}
+.ph-btn.has-img{border-style:solid}
+.ph-btn.has-img img{display:block}
+.ph-btn input{display:none}
+.ph-x{appearance:none;border:0;background:transparent;color:#8b95ab;font-size:16px;cursor:pointer;padding:0 4px;vertical-align:middle;visibility:hidden}
+.ph-btn.has-img+.ph-x{visibility:visible}
+.ph-x:hover{color:#ff8ea2}
 .roster .inp{padding:7px 8px}
 .roster-team+.roster-team{margin-top:16px}
 .roster-team h4{font-family:var(--display);font-weight:normal;font-size:20px;letter-spacing:2px;color:var(--c);margin-bottom:6px}
@@ -416,18 +421,13 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       <div class="sub"><span id="flashSub">HOME +3</span></div>
     </div>
 
-    <!-- MODULE 3: STARTING LINEUP CARD -->
+    <!-- MODULE 3: LINEUP BAR -->
     <div class="lineup t-home" id="lineup">
-      <div class="lu-side">
+      <div class="lu-title">
         <div class="logo" id="luLogo"><img alt=""><span class="mono"></span></div>
-        <div class="lu-kicker">TONIGHT'S STARTERS</div>
-        <div class="lu-team" id="luTeam">HOME</div>
-        <div class="lu-coach"><small>HEAD COACH</small><b id="luCoach">COACH</b></div>
+        <div class="lu-word">LINEUP</div>
       </div>
-      <div class="lu-main">
-        <div class="lu-head"><h2>STARTING <em>LINEUP</em></h2><span id="luAbbr">HOME</span></div>
-        <div class="lu-rows" id="luRows"></div>
-      </div>
+      <div class="lu-players" id="luPlayers"></div>
     </div>
 
     <!-- MODULE 4: LIVE STATS SIDEBAR -->
@@ -539,7 +539,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     <!-- TRIGGER TOGGLES -->
     <section class="card trig span-3">
       <div class="trig-group">
-        <span class="lbl">STARTING LINEUP</span>
+        <span class="lbl">LINEUP</span>
         <div class="btns">
           <button class="btn" data-act="lineup" data-team="home" id="tgLuHome">SHOW HOME</button>
           <button class="btn" data-act="lineup" data-team="away" id="tgLuAway">SHOW AWAY</button>
@@ -594,7 +594,6 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           <div class="field"><label>SCHOOL LOGO (PNG)</label><input type="file" class="inp" accept="image/png,image/*" data-logo-input="home"></div>
           <button class="btn sm ghost" data-act="clearLogo" data-team="home">CLEAR</button>
         </div>
-        <div class="field"><label>HEAD COACH</label><input class="inp" data-bind="home.coach" maxlength="32"></div>
       </div>
 
       <div class="team-cfg t-away">
@@ -609,15 +608,14 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           <div class="field"><label>SCHOOL LOGO (PNG)</label><input type="file" class="inp" accept="image/png,image/*" data-logo-input="away"></div>
           <button class="btn sm ghost" data-act="clearLogo" data-team="away">CLEAR</button>
         </div>
-        <div class="field"><label>HEAD COACH</label><input class="inp" data-bind="away.coach" maxlength="32"></div>
       </div>
     </section>
 
     <!-- PRE-GAME CONFIGURATION: ROSTERS -->
     <section class="card">
-      <h3>PRE-GAME CONFIG · STARTING FIVE</h3>
-      <div class="roster-team t-home"><h4>HOME STARTERS</h4><table class="roster" id="rosterHome"></table></div>
-      <div class="roster-team t-away"><h4>AWAY STARTERS</h4><table class="roster" id="rosterAway"></table></div>
+      <h3>PRE-GAME CONFIG · LINEUP</h3>
+      <div class="roster-team t-home"><h4>HOME LINEUP</h4><table class="roster" id="rosterHome"></table></div>
+      <div class="roster-team t-away"><h4>AWAY LINEUP</h4><table class="roster" id="rosterAway"></table></div>
     </section>
 
     <!-- PRE-GAME CONFIGURATION: BROADCAST / RULES -->
@@ -752,6 +750,8 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     if (raw) { try { merge(s, JSON.parse(raw)); } catch (e) {} }
     return normalize(s);
   }
+  function photoKey(team, i) { return 'hoopscast.photo.' + team + '.' + i; }
+  function readPhoto(team, i) { try { return localStorage.getItem(photoKey(team, i)) || ''; } catch (e) { return ''; } }
   function readLogo(team) { try { return localStorage.getItem(LOGO_KEY[team]) || ''; } catch (e) { return ''; } }
 
   function getPath(obj, path) {
@@ -870,13 +870,31 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     var lastFlashId = state.flash.id;
     var flashTimer = null;
 
-    // Build lineup rows and stats rows once.
-    var luRows = $('luRows');
+    // Build lineup cards and stats rows once.
+    var luPlayers = $('luPlayers');
+    var luCards = [];
     for (var i = 0; i < 5; i++) {
-      var r = document.createElement('div');
-      r.className = 'lu-row';
-      r.innerHTML = '<div class="lu-num"></div><div class="lu-name"></div><div class="lu-pos"></div>';
-      luRows.appendChild(r);
+      var c = document.createElement('div');
+      c.className = 'lu-card';
+      c.innerHTML = '<div class="lu-photo"><img alt="">' +
+        '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="32" r="20"/><path d="M8 100c0-25 19-42 42-42s42 17 42 42z"/></svg>' +
+        '<div class="lu-tag"><span class="num"></span><span class="pos"></span></div></div>' +
+        '<div class="lu-name"><span></span></div>';
+      luPlayers.appendChild(c);
+      luCards.push({ el: c, photo: c.querySelector('.lu-photo'), img: c.querySelector('.lu-photo img'),
+        num: c.querySelector('.num'), pos: c.querySelector('.pos'), name: c.querySelector('.lu-name span') });
+    }
+    // Shrink a name to fit on one line; if it is still too long, wrap it onto two lines.
+    function fitText(span, max, min) {
+      var box = span.parentNode, w = box.clientWidth - 24, size = max;
+      span.style.whiteSpace = 'nowrap';
+      span.style.fontSize = size + 'px';
+      while (size > min && span.scrollWidth > w) { size -= 1; span.style.fontSize = size + 'px'; }
+      if (span.scrollWidth > w) {
+        span.style.whiteSpace = 'normal';
+        size = 18; span.style.fontSize = size + 'px';
+        while (size > 11 && (span.offsetHeight > box.clientHeight - 10 || span.scrollWidth > w)) { size -= 1; span.style.fontSize = size + 'px'; }
+      }
     }
     var stRows = $('stRows');
     var statEls = {};
@@ -926,16 +944,16 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       var t = s[team];
       lineup.classList.remove('t-home', 't-away'); lineup.classList.add('t-' + team);
       setLogoEl($('luLogo'), team, s);
-      setText($('luTeam'), t.name || team.toUpperCase());
-      setText($('luAbbr'), (t.abbr || '').toUpperCase());
-      setText($('luCoach'), t.coach || '—');
-      var rows = luRows.children;
       for (var i = 0; i < 5; i++) {
-        var p = t.roster[i];
-        setText(rows[i].children[0], p.num || '');
-        setText(rows[i].children[1], p.name || '');
-        setText(rows[i].children[2], p.pos || '');
-        rows[i].style.visibility = (p.num || p.name || p.pos) ? '' : 'hidden';
+        var p = t.roster[i], card = luCards[i];
+        setText(card.num, p.num ? '#' + p.num : '');
+        setText(card.pos, p.pos || '');
+        card.num.parentNode.style.display = (p.num || p.pos) ? '' : 'none';
+        setText(card.name, p.name || '');
+        fitText(card.name, 22, 13);
+        var src = readPhoto(team, i);
+        if (src) { if (card.img.getAttribute('src') !== src) card.img.src = src; card.photo.classList.add('has-img'); }
+        else { card.img.removeAttribute('src'); card.photo.classList.remove('has-img'); }
       }
     }
     function updateLineup(s) {
@@ -1001,16 +1019,21 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       state = parseState(raw);
       render(state, false);
     }
+    var lastPhotoSig = '';
     function pullLogos() {
       var changed = false;
       TEAMS.forEach(function (t) { var l = readLogo(t); if (l !== lastLogos[t]) { lastLogos[t] = l; changed = true; } });
       if (changed) { renderOutputs(stage, state); if (luShown) fillLineup(luShown, state); }
+      if (luShown) {
+        var sig = [0, 1, 2, 3, 4].map(function (i) { return readPhoto(luShown, i).length; }).join(',');
+        if (sig !== lastPhotoSig) { lastPhotoSig = sig; fillLineup(luShown, state); }
+      }
     }
 
     // Real-time sync: storage events fire instantly in other tabs/frames; polling is a safety net.
     window.addEventListener('storage', function (e) {
       if (e.key === STATE_KEY || e.key === null) pull();
-      if (e.key === LOGO_KEY.home || e.key === LOGO_KEY.away || e.key === null) pullLogos();
+      if (e.key === LOGO_KEY.home || e.key === LOGO_KEY.away || e.key === null || (e.key && e.key.indexOf('hoopscast.photo.') === 0)) pullLogos();
     });
     window.addEventListener('storage', function (e) { if (e.key === FONT_KEY || e.key === null) applyFont(); });
     setInterval(function () { pull(); pullLogos(); }, 400);
@@ -1087,12 +1110,15 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     // ---- Build roster matrix and stat logger ----
     function buildRoster(team, tableId) {
       var tbl = $(tableId);
-      var html = '<thead><tr><th>JERSEY #</th><th>PLAYER NAME</th><th>POS</th></tr></thead><tbody>';
+      var html = '<thead><tr><th>JERSEY #</th><th>PLAYER NAME</th><th>POS</th><th>PHOTO</th></tr></thead><tbody>';
       for (var i = 0; i < 5; i++) {
         html += '<tr>' +
           '<td><input class="inp" maxlength="3" data-bind="' + team + '.roster.' + i + '.num" aria-label="' + team + ' starter ' + (i + 1) + ' jersey"></td>' +
-          '<td><input class="inp" maxlength="28" data-bind="' + team + '.roster.' + i + '.name" aria-label="' + team + ' starter ' + (i + 1) + ' name"></td>' +
-          '<td><input class="inp" maxlength="3" data-type="upper" data-bind="' + team + '.roster.' + i + '.pos" aria-label="' + team + ' starter ' + (i + 1) + ' position"></td>' +
+          '<td><input class="inp" maxlength="40" data-bind="' + team + '.roster.' + i + '.name" aria-label="' + team + ' starter ' + (i + 1) + ' name"></td>' +
+          '<td class="pos-cell"><input class="inp" maxlength="3" data-type="upper" data-bind="' + team + '.roster.' + i + '.pos" aria-label="' + team + ' starter ' + (i + 1) + ' position"></td>' +
+          '<td class="ph"><label class="ph-btn" title="Upload player photo" data-ph="' + team + '.' + i + '"><img alt=""><span>+</span>' +
+            '<input type="file" accept="image/*" data-photo="' + team + '.' + i + '"></label>' +
+            '<button class="ph-x" title="Remove photo" data-act="clearPhoto" data-team="' + team + '" data-n="' + i + '">×</button></td>' +
           '</tr>';
       }
       tbl.innerHTML = html + '</tbody>';
@@ -1175,6 +1201,8 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       var team = el.getAttribute && el.getAttribute('data-logo-input');
       if (team && el.files && el.files[0]) loadLogo(team, el.files[0], el);
       if (el.id === 'fontInput' && el.files && el.files[0]) loadFont(el.files[0], el);
+      var ph = el.getAttribute && el.getAttribute('data-photo');
+      if (ph && el.files && el.files[0]) loadPhoto(ph.split('.')[0], +ph.split('.')[1], el.files[0], el);
     });
 
     function updateFontStatus() {
@@ -1195,6 +1223,38 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           toast('Scoreboard font loaded.');
         } catch (err) { toast('Font too large for LocalStorage. Try a .woff2 version.'); }
         inputEl.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+    function renderPhotos() {
+      root.querySelectorAll('[data-ph]').forEach(function (lb) {
+        var k = lb.getAttribute('data-ph').split('.'), src = readPhoto(k[0], +k[1]), img = lb.querySelector('img');
+        if (src) { if (img.getAttribute('src') !== src) img.src = src; lb.classList.add('has-img'); }
+        else { img.removeAttribute('src'); lb.classList.remove('has-img'); }
+      });
+    }
+    function loadPhoto(team, i, file, inputEl) {
+      if (!/^image\//.test(file.type)) { toast('Please choose an image file.'); return; }
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var max = 440, sc = Math.min(1, max / Math.max(img.width, img.height));
+          var c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * sc));
+          c.height = Math.max(1, Math.round(img.height * sc));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          var png = file.type === 'image/png';
+          var data = png ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.86);
+          try {
+            localStorage.setItem(photoKey(team, i), data);
+            toast('Photo added for ' + team.toUpperCase() + ' player ' + (i + 1) + '.');
+          } catch (err) { toast('Not enough storage for this photo. Try a smaller image or a JPG.'); }
+          inputEl.value = '';
+          renderPhotos();
+        };
+        img.onerror = function () { toast('That image could not be read.'); };
+        img.src = reader.result;
       };
       reader.readAsDataURL(file);
     }
@@ -1308,6 +1368,10 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           try { localStorage.removeItem(LOGO_KEY[t]); } catch (e) {}
           toast(t.toUpperCase() + ' logo cleared.');
           break;
+        case 'clearPhoto':
+          try { localStorage.removeItem(photoKey(t, parseInt(d.n, 10))); } catch (e) {}
+          renderPhotos(); toast('Photo removed.');
+          return;
         case 'clearFont':
           try { localStorage.removeItem(FONT_KEY); localStorage.removeItem(FONT_NAME_KEY); } catch (e) {}
           applyFont(); updateFontStatus(); toast('Scoreboard font cleared.');
@@ -1408,12 +1472,14 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     window.addEventListener('storage', function (e) {
       if (e.key === STATE_KEY || e.key === null) { state = parseState(readRaw()); populateInputs(false); render(); }
       if (e.key === LOGO_KEY.home || e.key === LOGO_KEY.away) render();
+      if (e.key && e.key.indexOf('hoopscast.photo.') === 0) renderPhotos();
     });
 
     // First save writes defaults so the overlay has data even before any button is pressed.
     if (!readRaw()) { try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch (e) {} }
     populateInputs(true);
     updateFontStatus();
+    renderPhotos();
     render();
     setupPreview();
     clockLoop();
