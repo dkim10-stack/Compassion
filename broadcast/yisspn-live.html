@@ -167,7 +167,8 @@ html.mode-control #overlay{display:none}
 .lu-name span{display:block;max-width:100%;white-space:nowrap;font-size:18px;line-height:1.1;overflow-wrap:anywhere}
 
 /* ---------- MODULE 4: LIVE STATS SIDEBAR ---------- */
-.stats{position:absolute;right:48px;top:150px;width:580px;border-radius:18px;overflow:hidden;
+.stats{position:absolute;right:48px;top:150px;width:600px;border-radius:18px;overflow:hidden;color:#fff;
+  font-family:var(--bug-font);font-stretch:expanded;font-weight:700;
   background:var(--glass-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   box-shadow:0 26px 70px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.1);
   transform:translateX(680px);transition:transform .75s var(--ease-out)}
@@ -180,11 +181,10 @@ html.mode-control #overlay{display:none}
 .st-team{display:flex;align-items:center;gap:12px}
 .st-team.r{justify-content:flex-end}
 .st-team .logo{width:56px;height:56px}
-.st-team .logo .mono{font-size:17px}
-.st-team b{font-family:var(--display);font-weight:normal;font-size:44px;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.st-team .logo .mono{font-family:var(--bug-font);font-stretch:expanded;font-weight:700;font-size:15px;color:#fff}
+.st-team b{font-weight:700;font-size:30px;letter-spacing:0;color:#fff}
 .st-title{text-align:center}
-.st-title div{font-family:var(--heavy);font-size:20px;letter-spacing:5px}
-.st-title small{display:block;margin-top:4px;font-family:var(--heavy);font-size:13px;letter-spacing:3px;color:var(--accent)}
+.st-title div{font-size:16px;letter-spacing:2px;color:#fff}
 .st-rows{padding:8px 22px 22px}
 .st-row{padding:14px 0 12px;border-bottom:1px solid var(--line);opacity:0;transform:translateX(40px);transition:opacity .4s,transform .55s var(--ease-out)}
 .st-row:last-child{border-bottom:0}
@@ -195,17 +195,19 @@ html.mode-control #overlay{display:none}
 .stats.show .st-row:nth-child(4){transition-delay:.43s}
 .stats.show .st-row:nth-child(5){transition-delay:.49s}
 .stats.show .st-row:nth-child(6){transition-delay:.55s}
-.st-line{display:grid;grid-template-columns:150px 1fr 150px;align-items:center}
-.st-val{font-family:var(--display);font-size:46px;line-height:1}
+.st-line{display:grid;grid-template-columns:170px 1fr 170px;align-items:center}
+.st-val{font-size:30px;line-height:1;color:#fff;white-space:nowrap}
 .st-val.r{text-align:right}
-.st-val small{font-family:var(--heavy);font-size:14px;letter-spacing:1px;color:rgba(255,255,255,.6);margin-left:6px}
+.st-val .v{display:inline-block;min-width:58px;padding:7px 10px;text-align:center;border-radius:0;background:transparent;transition:background-color .4s ease}
+.st-val.h.lead .v{background:var(--home)}
+.st-val.a.lead .v{background:var(--away)}
+.st-val small{font-size:12px;letter-spacing:0;color:#fff;margin-left:6px}
 .st-val.r small{margin:0 6px 0 0}
-.st-val.lead{color:var(--accent);text-shadow:0 0 14px rgba(var(--accent-rgb),.55)}
-.st-lbl{text-align:center;font-family:var(--heavy);font-size:17px;letter-spacing:3px;color:rgba(255,255,255,.85)}
+.st-lbl{text-align:center;font-size:13px;letter-spacing:1px;color:#fff}
 .st-bar{display:flex;gap:4px;height:8px;margin-top:10px}
-.st-bar i{display:block;height:100%;border-radius:4px;transition:flex-grow .8s var(--ease-out)}
-.st-bar .h{background:var(--home);box-shadow:0 0 10px rgba(var(--home-rgb),.8)}
-.st-bar .a{background:var(--away);box-shadow:0 0 10px rgba(var(--away-rgb),.8)}
+.st-bar i{display:block;height:100%;border-radius:0;transition:flex-grow .8s var(--ease-out)}
+.st-bar .h{background:var(--home)}
+.st-bar .a{background:var(--away)}
 
 /* First-run hint shown only when the overlay is opened directly in a normal browser tab */
 .hint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);pointer-events:auto;z-index:5;
@@ -435,7 +437,7 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     <div class="stats" id="stats">
       <div class="st-head">
         <div class="st-team t-home"><div class="logo" data-logo-for="home"><img alt=""><span class="mono"></span></div><b data-o="home.abbr"></b></div>
-        <div class="st-title"><div>TEAM STATS</div><small id="stPeriod">1ST QTR</small></div>
+        <div class="st-title"><div>TEAM STATS</div></div>
         <div class="st-team r t-away"><b data-o="away.abbr"></b><div class="logo" data-logo-for="away"><img alt=""><span class="mono"></span></div></div>
       </div>
       <div class="st-rows" id="stRows"></div>
@@ -918,7 +920,11 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
     fit();
 
     function fillValue(el, v) {
-      el.textContent = v.txt;
+      el.textContent = '';
+      var val = document.createElement('span');
+      val.className = 'v';
+      val.textContent = v.txt;
+      el.appendChild(val);
       if (v.small) {
         var sm = document.createElement('small');
         sm.textContent = v.small;
@@ -926,7 +932,6 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
       }
     }
     function renderStats(s) {
-      setText($('stPeriod'), periodLong(s));
       STAT_ROWS.forEach(function (row) {
         var e = statEls[row.key];
         var h = statValue(s, 'home', row.key), a = statValue(s, 'away', row.key);
