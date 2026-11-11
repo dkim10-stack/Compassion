@@ -67,20 +67,23 @@ html.mode-control #overlay{display:none}
   transition:transform .7s var(--ease-out),opacity .5s ease}
 .bug.off{transform:translateX(-115%);opacity:0}
 .bug-teams{display:flex;flex-direction:column}
-.bug-row{position:relative;display:flex;align-items:center;width:440px;height:62px;overflow:hidden}
+.bug-row{position:relative;display:flex;align-items:center;height:62px;overflow:hidden}
 .bug-row+.bug-row{border-top:2px solid rgba(255,255,255,.08)}
 .bug-row .strip{align-self:stretch;width:10px;background:var(--c)}
 .bug-row .logo{width:44px;height:44px;margin:0 12px;border-radius:0}
 .bug-row .logo .mono{border-radius:0;font-family:var(--bug-font);font-stretch:expanded;font-weight:700;font-size:12px;letter-spacing:0}
-.bug-row .abbr{font-size:30px;line-height:1;letter-spacing:0;width:128px;white-space:nowrap;overflow:hidden;text-transform:uppercase}
-.bug-row .meta{display:flex;flex-direction:column;gap:5px;align-items:flex-start;width:100px}
-.bug-row .fouls{font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.7)}
-.bug-row .fouls b{color:#fff;font-size:13px;margin-left:5px}
-.bug-row .bonus{font-size:10px;letter-spacing:1px;padding:3px 6px;border-radius:0;background:var(--accent);color:#111;
+.bug-row .abbr-wrap{position:relative;width:118px;height:100%;margin-right:12px}
+.bug-row .abbr{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);font-size:30px;line-height:1;letter-spacing:0;
+  white-space:nowrap;overflow:hidden;text-transform:uppercase;transition:transform .35s var(--ease-out)}
+.bug-row .abbr-wrap.bonus-on .abbr{transform:translateY(calc(-50% - 7px))}
+.bug-row .bonus{position:absolute;left:0;bottom:6px;font-size:9px;letter-spacing:1px;padding:2px 5px;border-radius:0;background:var(--accent);color:#111;
   transform:scale(0);transform-origin:left center;transition:transform .35s var(--ease-out)}
 .bug-row .bonus.on{transform:scale(1)}
-.bug-row .score{margin-left:auto;height:100%;width:100px;display:grid;place-items:center;
-  font-size:40px;line-height:1;background:var(--c);color:var(--c-ink);font-variant-numeric:tabular-nums}
+.bug-row .score{height:100%;width:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:var(--c);color:var(--c-ink);font-variant-numeric:tabular-nums}
+.bug-row .score>span{font-size:34px;line-height:1}
+.bug-row .score .fouls{font-size:9px;line-height:1;letter-spacing:1px;color:var(--c-ink);white-space:nowrap}
+.bug-row .score .fouls b{font-weight:700;color:var(--c-ink)}
 .bug-row .score span{display:inline-block}
 .bug-row .score span.bump{animation:scoreBump .75s var(--ease-out)}
 .bug-row .sweep{position:absolute;inset:0;pointer-events:none;opacity:0;background:#fff}
@@ -376,23 +379,21 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
         <div class="bug-row t-home">
           <div class="strip"></div>
           <div class="logo" data-logo-for="home"><img alt=""><span class="mono"></span></div>
-          <div class="abbr" data-o="home.abbr"></div>
-          <div class="meta">
-            <div class="fouls">FOULS<b data-o="home.fouls"></b></div>
+          <div class="abbr-wrap" id="abbrWrapHome">
+            <div class="abbr" data-o="home.abbr"></div>
             <div class="bonus" id="bonusHome">BONUS</div>
           </div>
-          <div class="score"><span id="scoreHome">0</span></div>
+          <div class="score"><span id="scoreHome">0</span><div class="fouls">FOULS: <b data-o="home.fouls"></b></div></div>
           <div class="sweep" id="sweepHome"></div>
         </div>
         <div class="bug-row t-away">
           <div class="strip"></div>
           <div class="logo" data-logo-for="away"><img alt=""><span class="mono"></span></div>
-          <div class="abbr" data-o="away.abbr"></div>
-          <div class="meta">
-            <div class="fouls">FOULS<b data-o="away.fouls"></b></div>
+          <div class="abbr-wrap" id="abbrWrapAway">
+            <div class="abbr" data-o="away.abbr"></div>
             <div class="bonus" id="bonusAway">BONUS</div>
           </div>
-          <div class="score"><span id="scoreAway">0</span></div>
+          <div class="score"><span id="scoreAway">0</span><div class="fouls">FOULS: <b data-o="away.fouls"></b></div></div>
           <div class="sweep" id="sweepAway"></div>
         </div>
       </div>
@@ -972,7 +973,9 @@ kbd{font-family:var(--heavy);font-size:11px;padding:2px 7px;border-radius:5px;ba
           prev[t] = s[t].score;
         } else if (first) setText(scoreEl[t], s[t].score);
         var opp = t === 'home' ? 'away' : 'home';
-        bonusEl[t].classList.toggle('on', s[opp].fouls >= s.settings.bonusAt);
+        var inBonus = s[opp].fouls >= s.settings.bonusAt;
+        bonusEl[t].classList.toggle('on', inBonus);
+        $('abbrWrap' + (t === 'home' ? 'Home' : 'Away')).classList.toggle('bonus-on', inBonus);
       });
       setText(bugPeriod, periodLabel(s));
       if (!first && s.period !== prev.period) restart(bugPeriod, 'bump');
