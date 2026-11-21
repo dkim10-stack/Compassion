@@ -1523,7 +1523,8 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     //   1 2 3        home +1 / +2 / +3          8 9 0   away +1 / +2 / +3
     //   F            home foul                  J       away foul
     //   Z            undo last score, foul or stat change
-    //   Up / Down    clock +1s / -1s            Shift + Up / Down   clock +0.1s / -0.1s
+    //   = / -        clock +1s / -1s            Shift + = / -       clock +0.1s / -0.1s
+    //   Up / Down    same as = / - (arrows are handled exactly like every other key)
     var KEYS = {
       Digit1: { act: 'score', team: 'home', n: '1' }, Digit2: { act: 'score', team: 'home', n: '2' }, Digit3: { act: 'score', team: 'home', n: '3' },
       Digit8: { act: 'score', team: 'away', n: '1' }, Digit9: { act: 'score', team: 'away', n: '2' }, Digit0: { act: 'score', team: 'away', n: '3' },
@@ -1547,35 +1548,15 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       return repeat;
     }
     document.addEventListener('keyup', function (e) {
-      var now = Date.now();
-      [keyId(e), e.code, e.key].forEach(function (id) {
+      var now = Date.now(), ids = [keyId(e), e.code, e.key];
+      // A release that cannot be identified (or any arrow release) frees the arrow keys.
+      if (!e.code || /^Arrow/.test(e.code) || /^Arrow/.test(e.key)) ids = ids.concat(['ArrowUp', 'ArrowDown']);
+      ids.forEach(function (id) {
         var k = id && keyState[id];
         if (k) { k.down = false; k.up = now; k.sawUp = true; }
       });
     });
     window.addEventListener('blur', function () { keyState = {}; });
-
-    // Arrow keys: OBS on macOS does not reliably report when an arrow key is released, so holds are told apart
-    // from taps by rhythm. A held key repeats in a fast, steady stream (< 110 ms apart); any press after a longer
-    // gap is a real tap and counts. The keyboard's first auto-repeat arrives after a pause and looks like a tap,
-    // so when a repeat stream starts right after it, that press is taken back.
-    var ARROW_REPEAT_MS = 110, arrowState = {};
-    function arrowPress(e) {
-      var now = Date.now(), s = arrowState[e.key] || (arrowState[e.key] = { down: 0, stream: false, lastAt: 0, prevAt: 0, lastStep: 0 });
-      var gap = now - s.down;
-      s.down = now;
-      if (e.repeat || gap < ARROW_REPEAT_MS) {
-        if (!s.stream && !e.repeat && s.lastAt && s.lastAt - s.prevAt < 2000) {
-          act({ act: 'clockAdj', n: String(-s.lastStep) });
-          s.lastAt = s.prevAt;
-        }
-        s.stream = true;
-        return;
-      }
-      var step = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 0.1 : 1);
-      s.stream = false; s.prevAt = s.lastAt; s.lastAt = now; s.lastStep = step;
-      act({ act: 'clockAdj', n: String(step) });
-    }
 
     document.addEventListener('keydown', function (e) {
       var a = document.activeElement;
@@ -1583,15 +1564,16 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
         (a.tagName === 'INPUT' && !/^(button|checkbox|radio|color|file|submit|reset|range)$/i.test(a.type)));
       if (typing || e.metaKey || e.ctrlKey || e.altKey) { isHeldRepeat(e); return; }
       var isSpace = e.code === 'Space' || e.key === ' ';
-      var isArrow = e.key === 'ArrowUp' || e.key === 'ArrowDown';
+      var clockDir = (e.key === 'ArrowUp' || e.code === 'Equal' || e.code === 'NumpadAdd') ? 1
+        : (e.key === 'ArrowDown' || e.code === 'Minus' || e.code === 'NumpadSubtract') ? -1 : 0;
       var shortcut = !e.shiftKey && KEYS[e.code];
       var isUndo = !e.shiftKey && e.code === 'KeyZ';
-      if (!isSpace && !isArrow && !shortcut && !isUndo) { isHeldRepeat(e); return; }
+      if (!isSpace && !clockDir && !shortcut && !isUndo) { isHeldRepeat(e); return; }
       e.preventDefault();
-      if (isArrow) { if (a && a.blur && a !== document.body) a.blur(); arrowPress(e); return; }
       if (isHeldRepeat(e)) return; // holding any key counts once
       if (a && a.blur && a !== document.body) a.blur();
       if (isSpace) clockToggle();
+      else if (clockDir) act({ act: 'clockAdj', n: String(clockDir * (e.shiftKey ? 0.1 : 1)) });
       else if (isUndo) undo();
       else act(shortcut);
     });
