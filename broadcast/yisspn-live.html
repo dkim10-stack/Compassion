@@ -636,13 +636,6 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     <section class="card">
       <h3>PRE-GAME CONFIG · BROADCAST</h3>
       <div class="field"><label>LABEL UNDER SCOREBOARD (LEAVE EMPTY TO HIDE)</label><input class="inp" maxlength="40" data-bind="settings.label"></div>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
-        <label class="check"><input type="checkbox" data-bind="settings.resetFouls" data-type="bool"> Reset team fouls when advancing period</label>
-        <label class="check"><input type="checkbox" data-bind="settings.ftAuto" data-type="bool"> +1 logs a made free throw (FTM + FTA)</label>
-      </div>
-      <p class="note">+3 automatically logs a 3-pointer; with the setting on, +1 logs a made free throw. <b>FT MISS</b> logs a missed attempt.</p>
-      <p class="note">Game rules are fixed to NFHS: four 8:00 quarters, 4:00 overtime, bonus on the 5th team foul.</p>
-      <p class="note"><b>OBS setup:</b> overlay = this file as a Browser source (1920×1080). Control panel = a second Browser source of this file in an off-air scene, with <code>:root{--yisspn-mode:control}</code> in its Custom CSS; right-click it → <b>Interact</b> to operate.</p>
     </section>
   </main>
   </div>
@@ -743,10 +736,10 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
   function parseState(raw) {
     var s = defaultState();
     if (raw) { try { merge(s, JSON.parse(raw)); } catch (e) {} }
-    // Accent color and game rules are fixed defaults (no longer editable).
+    // Accent color, game rules and stat-logging options are fixed defaults (no longer editable).
     var d = defaultState();
     s.accent = d.accent;
-    ['periods', 'periodMin', 'otMin', 'bonusAt'].forEach(function (k) { s.settings[k] = d.settings[k]; });
+    ['periods', 'periodMin', 'otMin', 'bonusAt', 'resetFouls', 'ftAuto'].forEach(function (k) { s.settings[k] = d.settings[k]; });
     return normalize(s);
   }
   function photoKey(team, i) { return 'hoopscast.photo.' + team + '.' + i; }
