@@ -213,7 +213,8 @@ html.mode-control #overlay{display:none}
 .st-val small{font-size:12px;letter-spacing:0;color:#fff;margin-left:6px}
 .st-val.r small{margin:0 6px 0 0}
 .st-lbl{text-align:center;font-size:17px;letter-spacing:1px;color:#fff;white-space:nowrap}
-.st-bar{display:flex;gap:4px;height:8px;margin-top:10px}
+.st-bar{display:flex;height:8px;margin-top:10px}
+.st-bar.split .h{margin-right:4px}
 .st-bar i{display:block;height:100%;border-radius:0;transition:flex-grow .8s var(--ease-out)}
 .st-bar .h{background:var(--home)}
 .st-bar .a{background:var(--away)}
@@ -594,7 +595,6 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
   <main class="cp-grid setup-grid" data-tab="setup" hidden>
     <!-- PRE-GAME CONFIGURATION: TEAMS & BRANDING -->
     <section class="card">
-      <h3>PRE-GAME CONFIG · TEAMS &amp; BRANDING</h3>
 
       <div class="team-cfg t-home">
         <h4>HOME TEAM</h4>
@@ -627,14 +627,12 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
 
     <!-- PRE-GAME CONFIGURATION: ROSTERS -->
     <section class="card">
-      <h3>PRE-GAME CONFIG · LINEUP</h3>
       <div class="roster-team t-home"><h4>HOME LINEUP</h4><table class="roster" id="rosterHome"></table></div>
       <div class="roster-team t-away"><h4>AWAY LINEUP</h4><table class="roster" id="rosterAway"></table></div>
     </section>
 
     <!-- PRE-GAME CONFIGURATION: BROADCAST -->
     <section class="card">
-      <h3>PRE-GAME CONFIG · BROADCAST</h3>
       <div class="field"><label>LABEL UNDER SCOREBOARD (LEAVE EMPTY TO HIDE)</label><input class="inp" maxlength="40" data-bind="settings.label"></div>
     </section>
   </main>
@@ -933,6 +931,8 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
         var tot = h.n + a.n;
         e.bh.style.flexGrow = tot > 0 ? h.n / tot : 0.5;
         e.ba.style.flexGrow = tot > 0 ? a.n / tot : 0.5;
+        // Only leave a gap between the two colors when both teams have a share, so every bar spans the same width.
+        e.bh.parentNode.classList.toggle('split', tot === 0 || (h.n > 0 && a.n > 0));
       });
     }
 
