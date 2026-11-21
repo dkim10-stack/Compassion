@@ -5,7 +5,7 @@
   HOW TO USE
   1) OVERLAY (what viewers see): open this file with no hash, or with #overlay.
        OBS: Add "Browser" source -> check "Local file" -> pick this file -> Width 1920, Height 1080.
-  2) CONTROL PANEL (operator switchboard), inside OBS:
+  2) CONTROL PANEL, inside OBS:
        Make a scene called "Control Panel" (never put it on air). Add a second "Browser" source to it:
        check "Local file", pick this same file, Width 1280, Height 900, and in "Custom CSS" add the line
            :root{--yisspn-mode:control}
@@ -228,24 +228,23 @@ html.mode-control #overlay{display:none}
 /* =====================================================================
    OPERATOR CONTROL PANEL
    ===================================================================== */
-.cp{height:100vh;display:flex;flex-direction:column;overflow:hidden;color:#e6ebf5;font-stretch:expanded;font-family:var(--bug-font);font-size:14px;
+.cp{height:100vh;display:flex;flex-direction:column;overflow:hidden;color:#fff;font-stretch:expanded;font-family:var(--bug-font);font-size:14px;
   background:#070a12}
 .cp input,.cp select{font:inherit;color:inherit}
+.cp ::placeholder{color:#fff;opacity:.45}
 .cp button{font-family:inherit;color:inherit}
 .cp-top{flex:none;position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   padding:12px 20px;background:rgba(7,10,18,.88);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--bug-font);font-weight:700;font-size:26px;letter-spacing:2px}
-.brand b{color:var(--accent);font-weight:700}
-.brand small{font-family:var(--bug-font);font-weight:700;font-size:11px;letter-spacing:3px;color:#8b95ab;margin-left:6px}
+.brand b{color:#fff;font-weight:700}
+.brand small{font-family:var(--bug-font);font-weight:700;font-size:11px;letter-spacing:3px;color:#fff;margin-left:6px}
 .brand .dot{width:12px;height:12px;border-radius:0;background:#ff3355}
 .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.sync{font-family:var(--bug-font);font-weight:700;font-size:11px;letter-spacing:2px;color:#2bff88;padding:6px 10px;border-radius:0;background:rgba(43,255,136,.08);border:1px solid rgba(43,255,136,.3);transition:background .2s}
-.sync.pulse{background:rgba(43,255,136,.3)}
 .cp-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .cp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:12px 16px 24px;max-width:1800px;margin:0 auto}
 .cp-grid[hidden]{display:none}
 .tabs{display:flex;gap:6px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:0;padding:4px}
-.tab{appearance:none;border:0;background:transparent;border-radius:0;padding:9px 26px;font-family:var(--bug-font);font-weight:700;font-size:13px;letter-spacing:3px;color:#8b95ab;cursor:pointer}
+.tab{appearance:none;border:0;background:transparent;border-radius:0;padding:9px 26px;font-family:var(--bug-font);font-weight:700;font-size:13px;letter-spacing:3px;color:#fff;cursor:pointer}
 .tab.on{background:var(--accent);color:#111;}
 .scroll-btns{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:15;display:none;flex-direction:column;gap:8px}
 .scroll-btns.on{display:flex}
@@ -258,15 +257,15 @@ html.mode-control #overlay{display:none}
 @media (max-width:760px){.cp-grid{grid-template-columns:1fr;padding:12px}.span-2,.span-3{grid-column:auto}}
 .card{position:relative;background:rgba(18,24,40,.72);border:1px solid var(--line);border-radius:0;padding:16px;
   min-width:0}
-.card h3{white-space:nowrap;font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:3px;color:#8b95ab;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.card h3 .tag{font-size:10px;letter-spacing:2px;padding:3px 8px;border-radius:0;background:rgba(255,255,255,.06);color:#aab3c7}
+.card h3{white-space:nowrap;font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:3px;color:#fff;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h3 .tag{font-size:10px;letter-spacing:2px;padding:3px 8px;border-radius:0;background:rgba(255,255,255,.06);color:#fff}
 .btn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);
   border-radius:0;padding:10px 14px;font-family:var(--bug-font);font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer;user-select:none;
   transition:transform .08s,background .15s,box-shadow .15s,border-color .15s;white-space:nowrap}
 .btn:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.11)}
 .btn:active{transform:scale(.96)}
 .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.btn.danger{border-color:rgba(255,60,90,.45);color:#ff8ea2}
+.btn.danger{border-color:rgba(255,60,90,.45);color:#fff}
 .btn.ghost{background:transparent}
 .btn.on{background:var(--accent);color:#111;border-color:var(--accent);}
 .btn.sm{padding:6px 10px;font-size:12px;border-radius:0}
@@ -275,29 +274,29 @@ html.mode-control #overlay{display:none}
 .tc-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;min-width:0}
 .tc-head .logo{width:40px;height:40px}
 .tc-head .logo .mono{font-size:13px}
-.tc-abbr{font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:1px;color:var(--c);}
-.tc-name{font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:1px;color:#aab3c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-abbr{font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:1px;color:#fff;}
+.tc-name{font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:1px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tc-score{font-family:var(--bug-font);font-weight:700;font-size:76px;line-height:1;text-align:center;margin:0 0 8px;}
 .score-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .score-btns .btn{font-family:var(--bug-font);font-weight:700;font-size:32px;padding:10px 0;letter-spacing:1px;
   border-color:rgba(var(--c-rgb),.6);background:rgba(var(--c-rgb),.32)}
 .score-btns .btn:hover{background:rgba(var(--c-rgb),.5)}
 .score-btns .btn.three{border-color:var(--accent)}
-.score-btns .btn.minus{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);color:#ff8ea2}
+.score-btns .btn.minus{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);color:#fff}
 .tc-sub{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:10px}
 .foul-box{display:flex;align-items:center;gap:6px;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:0;padding:6px 8px}
-.foul-box span{font-family:var(--bug-font);font-weight:700;font-size:11px;letter-spacing:2px;color:#8b95ab}
+.foul-box span{font-family:var(--bug-font);font-weight:700;font-size:11px;letter-spacing:2px;color:#fff}
 .foul-box b{font-family:var(--bug-font);font-weight:700;font-size:32px;font-weight:700;min-width:34px;text-align:center}
 .foul-box .bonus-tag{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:1px;padding:3px 6px;border-radius:0;background:var(--accent);color:#111;visibility:hidden}
 .foul-box .bonus-tag.on{visibility:visible}
 
 .clock-ctl{text-align:center;display:flex;flex-direction:column;gap:9px}
 .period-line{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.period-line .pl{white-space:nowrap;font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:2px;color:var(--accent);}
+.period-line .pl{white-space:nowrap;font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:2px;color:#fff;}
 .big-clock{font-family:var(--bug-font);font-weight:700;font-size:76px;line-height:1;letter-spacing:2px;font-variant-numeric:tabular-nums;
   padding:6px 0;border-radius:0;background:rgba(0,0,0,.35);border:1px solid var(--line)}
-.big-clock.running{color:#2bff88;}
-.big-clock.zero{color:#ff3355;}
+.big-clock.running{color:#fff;}
+.big-clock.zero{color:#fff;}
 .clock-btn{font-family:var(--bug-font)!important;font-weight:700;font-size:32px!important;letter-spacing:3px;padding:10px!important;border-radius:0;
   background:#1aa85c!important;border-color:#2bff88!important;color:#fff;}
 .clock-btn.running{background:#d42a48!important;border-color:#ff7088!important;}
@@ -307,7 +306,7 @@ html.mode-control #overlay{display:none}
 .set-row{display:grid;grid-template-columns:1fr auto auto;gap:8px}
 
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
-.field label,.lbl{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#8b95ab}
+.field label,.lbl{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#fff}
 .inp{width:100%;min-width:0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);border-radius:0;padding:9px 10px;color:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
 .inp:focus{border-color:var(--accent);outline:1px solid var(--accent);}
 .inp.big{font-family:var(--bug-font);font-weight:700;font-size:24px;text-align:center;letter-spacing:2px;padding:6px 10px}
@@ -315,7 +314,7 @@ input[type=color].inp{padding:3px;height:40px;cursor:pointer}
 input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.check{display:flex;align-items:center;gap:8px;font-size:13px;color:#cfd6e4;cursor:pointer}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:#fff;cursor:pointer}
 .check input{width:18px;height:18px;accent-color:var(--accent)}
 
 .trig{display:grid;grid-template-columns:2fr 1fr;gap:10px;padding:12px}
@@ -336,7 +335,7 @@ input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 /* Keep the top bar on one line as the window narrows */
 .cp-top{flex-wrap:nowrap}
 @media (max-width:1180px){.brand small{display:none}.tab{padding:9px 18px}}
-@media (max-width:940px){.top-actions [data-act=openOverlay],.top-actions .sync{display:none}}
+@media (max-width:940px){.top-actions [data-act=openOverlay]{display:none}}
 @media (max-width:640px){.brand{font-size:20px}.tab{padding:8px 12px;letter-spacing:1px}}
 /* GAME tab always fits the window: it keeps its desktop layout and is scaled down by script when space is short. */
 .cp-scroll.fit{overflow:hidden}
@@ -345,7 +344,7 @@ input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .game-grid .trig{grid-template-columns:2fr 1fr}
 .game-grid .pop-btns{grid-template-columns:repeat(6,minmax(0,1fr))}
 .stat-table{width:100%;border-collapse:separate;border-spacing:0 5px;min-width:760px}
-.stat-table th{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:center;padding-bottom:2px}
+.stat-table th{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#fff;text-align:center;padding-bottom:2px}
 .stat-table th:first-child{text-align:left}
 .stat-table td{padding:4px 4px;background:rgba(0,0,0,.22)}
 .stat-table td:first-child{border-radius:0;font-family:var(--bug-font);font-weight:700;font-size:22px;letter-spacing:1px;padding-left:10px;width:70px}
@@ -353,39 +352,39 @@ input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .stepper{display:flex;align-items:center;justify-content:center;gap:6px}
 .stepper b{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:22px;min-width:30px;text-align:center}
 .stepper .btn{padding:3px 10px;font-size:15px}
-.th-home{color:var(--home)!important}.th-away{color:var(--away)!important}
+.th-home{color:#fff}.th-away{color:#fff}
 
-.note{font-size:12px;color:#8b95ab;line-height:1.5;margin-top:10px}
-.note code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:0;color:#d8deea}
+.note{font-size:12px;color:#fff;line-height:1.5;margin-top:10px}
+.note code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:0;color:#fff}
 kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;border-radius:0;background:#e6ebf5;color:#111}
 
 .team-cfg{border-left:4px solid var(--c);padding-left:14px;display:flex;flex-direction:column;gap:10px}
 .team-cfg+.team-cfg{margin-top:18px}
-.team-cfg h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:22px;letter-spacing:2px;color:var(--c)}
+.team-cfg h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:22px;letter-spacing:2px;color:#fff}
 .logo-row{display:flex;gap:10px;align-items:flex-end}
 .logo-row .logo{width:44px;height:44px}
 .logo-row .logo .mono{font-size:14px}
 .logo-row .field{flex:1}
 
 .roster{width:100%;border-collapse:collapse}
-.roster th{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:left;padding:4px 4px}
+.roster th{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#fff;text-align:left;padding:4px 4px}
 .roster td{padding:3px 4px}
 .roster td:first-child{width:58px}
 .roster td.pos-cell{width:64px}
 .roster td.ph{width:62px;white-space:nowrap}
 .ph-btn{position:relative;display:inline-grid;place-items:center;width:34px;height:40px;vertical-align:middle;cursor:pointer;
-  background:rgba(0,0,0,.35);border:1px dashed rgba(255,255,255,.3);color:#8b95ab;font-size:18px;overflow:hidden}
-.ph-btn:hover{border-color:var(--accent);color:var(--accent)}
+  background:rgba(0,0,0,.35);border:1px dashed rgba(255,255,255,.3);color:#fff;font-size:18px;overflow:hidden}
+.ph-btn:hover{border-color:var(--accent);color:#fff}
 .ph-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:none}
 .ph-btn.has-img{border-style:solid}
 .ph-btn.has-img img{display:block}
 .ph-btn input{display:none}
-.ph-x{appearance:none;border:0;background:transparent;color:#8b95ab;font-size:16px;cursor:pointer;padding:0 4px;vertical-align:middle;visibility:hidden}
+.ph-x{appearance:none;border:0;background:transparent;color:#fff;font-size:16px;cursor:pointer;padding:0 4px;vertical-align:middle;visibility:hidden}
 .ph-btn.has-img+.ph-x{visibility:visible}
-.ph-x:hover{color:#ff8ea2}
+.ph-x:hover{color:#fff}
 .roster .inp{padding:7px 8px}
 .roster-team+.roster-team{margin-top:16px}
-.roster-team h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:20px;letter-spacing:2px;color:var(--c);margin-bottom:6px}
+.roster-team h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:20px;letter-spacing:2px;color:#fff;margin-bottom:6px}
 .toast{position:fixed;right:80px;bottom:20px;z-index:20;background:#111827;border:1px solid var(--accent);color:#fff;padding:12px 16px;border-radius:0;
   font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:1px;transform:translateY(calc(100% + 40px));transition:transform .35s var(--ease-out)}
 .toast.show{transform:none}
@@ -468,13 +467,12 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
      ===================================================================== -->
 <div id="control" class="cp">
   <header class="cp-top">
-    <div class="brand"><span class="dot"></span>YISSPN <b>LIVE</b><small>OPERATOR SWITCHBOARD</small></div>
+    <div class="brand"><span class="dot"></span>YISSPN <b>LIVE</b><small>CONTROL PANEL</small></div>
     <nav class="tabs" role="tablist">
       <button class="tab on" data-tab-btn="game" role="tab">GAME</button>
       <button class="tab" data-tab-btn="setup" role="tab">SETUP</button>
     </nav>
     <div class="top-actions">
-      <span class="sync" id="syncBadge">● LIVE SYNC</span>
       <button class="btn sm" data-act="openOverlay">OPEN OVERLAY WINDOW</button>
       <button class="btn sm danger" data-act="resetGame">RESET GAME</button>
     </div>
@@ -1126,7 +1124,7 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     var root = document.getElementById('control');
     var $ = function (id) { return document.getElementById(id); };
     var state = parseState(readRaw());
-    var syncBadge = $('syncBadge'), toastEl = $('toast'), toastTimer = null, syncTimer = null;
+    var toastEl = $('toast'), toastTimer = null;
 
     function toast(msg) {
       toastEl.textContent = msg;
@@ -1139,9 +1137,6 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       state.rev = (state.rev || 0) + 1;
       try {
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
-        syncBadge.classList.add('pulse');
-        clearTimeout(syncTimer);
-        syncTimer = setTimeout(function () { syncBadge.classList.remove('pulse'); }, 180);
       } catch (e) {
         toast('Could not save to LocalStorage: ' + e.message);
       }
