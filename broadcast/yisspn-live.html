@@ -1502,18 +1502,35 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       Digit8: { act: 'score', team: 'away', n: '1' }, Digit9: { act: 'score', team: 'away', n: '2' }, Digit0: { act: 'score', team: 'away', n: '3' },
       KeyF: { act: 'foul', team: 'home', n: '1' }, KeyJ: { act: 'foul', team: 'away', n: '1' }
     };
+    // One action per physical key press. OBS's Interact window re-sends a held key as fresh key presses
+    // (without the browser's "repeat" flag, sometimes as release+press pairs), so track held keys ourselves:
+    // a key counts again only after it has been released, and a release followed almost instantly by a
+    // press is treated as the same hold.
+    var keyState = {};
+    function isHeldRepeat(e) {
+      var now = Date.now(), k = keyState[e.code] || (keyState[e.code] = { down: false, last: 0, up: 0 });
+      var repeat = e.repeat || (k.down && now - k.last < 1000) || (now - k.up < 40);
+      k.down = true; k.last = now;
+      return repeat;
+    }
+    document.addEventListener('keyup', function (e) {
+      var k = keyState[e.code];
+      if (k) { k.down = false; k.up = Date.now(); }
+    });
+    window.addEventListener('blur', function () { keyState = {}; });
+
     document.addEventListener('keydown', function (e) {
       var a = document.activeElement;
       var typing = a && (a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.isContentEditable ||
         (a.tagName === 'INPUT' && !/^(button|checkbox|radio|color|file|submit|reset|range)$/i.test(a.type)));
-      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) { isHeldRepeat(e); return; }
       var isSpace = e.code === 'Space' || e.key === ' ';
       var isArrow = e.key === 'ArrowUp' || e.key === 'ArrowDown';
       var shortcut = !e.shiftKey && KEYS[e.code];
       var isUndo = !e.shiftKey && e.code === 'KeyZ';
-      if (!isSpace && !isArrow && !shortcut && !isUndo) return;
+      if (!isSpace && !isArrow && !shortcut && !isUndo) { isHeldRepeat(e); return; }
       e.preventDefault();
-      if (e.repeat && !isArrow) return; // holding a key counts once (arrows may repeat)
+      if (isHeldRepeat(e)) return; // holding any key counts once
       if (a && a.blur && a !== document.body) a.blur();
       if (isSpace) clockToggle();
       else if (isArrow) act({ act: 'clockAdj', n: String((e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 0.1 : 1)) });
