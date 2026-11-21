@@ -277,7 +277,7 @@ html.mode-control #overlay{display:none}
 .tc-head .logo .mono{font-size:13px}
 .tc-abbr{font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:1px;color:var(--c);}
 .tc-name{font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:1px;color:#aab3c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tc-score{font-family:var(--bug-font);font-weight:700;font-size:92px;line-height:1;text-align:center;margin:2px 0 10px;}
+.tc-score{font-family:var(--bug-font);font-weight:700;font-size:76px;line-height:1;text-align:center;margin:0 0 8px;}
 .score-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .score-btns .btn{font-family:var(--bug-font);font-weight:700;font-size:32px;padding:10px 0;letter-spacing:1px;
   border-color:rgba(var(--c-rgb),.6);background:rgba(var(--c-rgb),.32)}
@@ -294,7 +294,7 @@ html.mode-control #overlay{display:none}
 .clock-ctl{text-align:center;display:flex;flex-direction:column;gap:9px}
 .period-line{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .period-line .pl{white-space:nowrap;font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:2px;color:var(--accent);}
-.big-clock{font-family:var(--bug-font);font-weight:700;font-size:92px;line-height:1;letter-spacing:2px;font-variant-numeric:tabular-nums;
+.big-clock{font-family:var(--bug-font);font-weight:700;font-size:76px;line-height:1;letter-spacing:2px;font-variant-numeric:tabular-nums;
   padding:6px 0;border-radius:0;background:rgba(0,0,0,.35);border:1px solid var(--line)}
 .big-clock.running{color:#2bff88;}
 .big-clock.zero{color:#ff3355;}
@@ -333,6 +333,17 @@ input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .pop-btns .btn{padding:11px 4px;font-size:12px;position:relative;overflow:hidden}
 .pop-btns .btn .cd{position:absolute;left:0;bottom:0;height:3px;background:#111;transform-origin:left center}
 @media (max-width:1000px){.pop-btns{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* Keep the top bar on one line as the window narrows */
+.cp-top{flex-wrap:nowrap}
+@media (max-width:1180px){.brand small{display:none}.tab{padding:9px 18px}}
+@media (max-width:940px){.top-actions [data-act=openOverlay],.top-actions .sync{display:none}}
+@media (max-width:640px){.brand{font-size:20px}.tab{padding:8px 12px;letter-spacing:1px}}
+/* GAME tab always fits the window: it keeps its desktop layout and is scaled down by script when space is short. */
+.cp-scroll.fit{overflow:hidden}
+.cp-grid.game-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin:0;max-width:none;padding:10px 14px;gap:10px;transform-origin:0 0}
+.game-grid .span-3{grid-column:1/-1}
+.game-grid .trig{grid-template-columns:2fr 1fr}
+.game-grid .pop-btns{grid-template-columns:repeat(6,minmax(0,1fr))}
 .stat-table{width:100%;border-collapse:separate;border-spacing:0 5px;min-width:760px}
 .stat-table th{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:center;padding-bottom:2px}
 .stat-table th:first-child{text-align:left}
@@ -1222,12 +1233,47 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
 
     // ---- Tabs and scrolling (scroll buttons work even where the mouse wheel does not, e.g. OBS Interact) ----
     var scroller = $('cpScroll'), scrollBtns = $('scrollBtns');
-    function updateScrollBtns() { scrollBtns.classList.toggle('on', scroller.scrollHeight > scroller.clientHeight + 4); }
+    function updateScrollBtns() {
+      scrollBtns.classList.toggle('on', !scroller.classList.contains('fit') && scroller.scrollHeight > scroller.clientHeight + 4);
+    }
+    // Scale the GAME tab so all of it is visible without scrolling, whatever the window size.
+    var gameGrid = root.querySelector('.game-grid');
+    var GAME_MIN_W = 1180; // narrowest layout width before the panel is scaled instead of squeezed
+    function fitGame() {
+      if (!gameGrid) return;
+      if (gameGrid.hidden) {
+        scroller.classList.remove('fit');
+        gameGrid.style.width = ''; gameGrid.style.transform = '';
+        return;
+      }
+      scroller.classList.add('fit');
+      scroller.scrollTop = 0;
+      var W = scroller.clientWidth, A = scroller.clientHeight, s = 1, Lw = W, H;
+      if (!W || !A) return;
+      for (var k = 0; k < 8; k++) {
+        Lw = Math.max(W / s, GAME_MIN_W);
+        gameGrid.style.width = Lw + 'px';
+        H = gameGrid.offsetHeight;
+        var ns = Math.min(1, W / Lw, A / H);
+        if (Math.abs(ns - s) < 0.001) break;
+        s = ns;
+      }
+      H = gameGrid.offsetHeight;
+      s = Math.min(1, W / Lw, A / H);
+      gameGrid.style.transform = 'translateX(' + Math.max(0, (W - Lw * s) / 2) + 'px) scale(' + s + ')';
+    }
+    var fitQueued = false;
+    function queueFit() {
+      if (fitQueued) return;
+      fitQueued = true;
+      requestAnimationFrame(function () { fitQueued = false; fitGame(); updateScrollBtns(); });
+    }
     function showTab(name) {
       root.querySelectorAll('[data-tab]').forEach(function (m) { m.hidden = m.getAttribute('data-tab') !== name; });
       root.querySelectorAll('[data-tab-btn]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-tab-btn') === name); });
       scroller.scrollTop = 0;
       try { sessionStorage.setItem('yisspn.tab', name); } catch (e) {}
+      fitGame();
       updateScrollBtns();
     }
     root.addEventListener('click', function (e) {
@@ -1236,7 +1282,9 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       var sb = e.target.closest('[data-scroll]');
       if (sb) { scroller.scrollBy({ top: +sb.getAttribute('data-scroll') * scroller.clientHeight * 0.7, behavior: 'smooth' }); sb.blur(); }
     });
-    window.addEventListener('resize', updateScrollBtns);
+    window.addEventListener('resize', queueFit);
+    if (window.ResizeObserver) new ResizeObserver(queueFit).observe(scroller);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', queueFit);
     document.addEventListener('keydown', function (e) {
       var a = document.activeElement;
       if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) return;
@@ -1509,6 +1557,7 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     }
 
     function render() {
+      queueFit();
       applyTheme(state);
       renderOutputs(root, state);
       setText($('cpPeriod'), periodLong(state));
