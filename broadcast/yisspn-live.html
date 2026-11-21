@@ -1506,7 +1506,6 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     // (without the browser's "repeat" flag, sometimes as release+press pairs), so track held keys ourselves:
     // a key counts again only after it has been released, and a release followed almost instantly by a
     // press is treated as the same hold.
-    // Arrow keys are tracked by name because OBS on macOS may report a different key code when they are released.
     // If no release is ever seen for a key, only rapid auto-repeat (presses < 150 ms apart) is treated as a hold.
     var keyState = {};
     function keyId(e) { return /^Arrow/.test(e.key) ? e.key : (e.code || e.key); }
@@ -1521,15 +1520,35 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       return repeat;
     }
     document.addEventListener('keyup', function (e) {
-      var now = Date.now(), ids = [keyId(e), e.code, e.key];
-      // A release that cannot be identified (or any arrow release) frees all arrow keys.
-      if (!e.code || /^Arrow/.test(e.code) || /^Arrow/.test(e.key)) ids = ids.concat(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
-      ids.forEach(function (id) {
+      var now = Date.now();
+      [keyId(e), e.code, e.key].forEach(function (id) {
         var k = id && keyState[id];
         if (k) { k.down = false; k.up = now; k.sawUp = true; }
       });
     });
     window.addEventListener('blur', function () { keyState = {}; });
+
+    // Arrow keys: OBS on macOS does not reliably report when an arrow key is released, so holds are told apart
+    // from taps by rhythm. A held key repeats in a fast, steady stream (< 110 ms apart); any press after a longer
+    // gap is a real tap and counts. The keyboard's first auto-repeat arrives after a pause and looks like a tap,
+    // so when a repeat stream starts right after it, that press is taken back.
+    var ARROW_REPEAT_MS = 110, arrowState = {};
+    function arrowPress(e) {
+      var now = Date.now(), s = arrowState[e.key] || (arrowState[e.key] = { down: 0, stream: false, lastAt: 0, prevAt: 0, lastStep: 0 });
+      var gap = now - s.down;
+      s.down = now;
+      if (e.repeat || gap < ARROW_REPEAT_MS) {
+        if (!s.stream && !e.repeat && s.lastAt && s.lastAt - s.prevAt < 2000) {
+          act({ act: 'clockAdj', n: String(-s.lastStep) });
+          s.lastAt = s.prevAt;
+        }
+        s.stream = true;
+        return;
+      }
+      var step = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 0.1 : 1);
+      s.stream = false; s.prevAt = s.lastAt; s.lastAt = now; s.lastStep = step;
+      act({ act: 'clockAdj', n: String(step) });
+    }
 
     document.addEventListener('keydown', function (e) {
       var a = document.activeElement;
@@ -1542,10 +1561,10 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       var isUndo = !e.shiftKey && e.code === 'KeyZ';
       if (!isSpace && !isArrow && !shortcut && !isUndo) { isHeldRepeat(e); return; }
       e.preventDefault();
+      if (isArrow) { if (a && a.blur && a !== document.body) a.blur(); arrowPress(e); return; }
       if (isHeldRepeat(e)) return; // holding any key counts once
       if (a && a.blur && a !== document.body) a.blur();
       if (isSpace) clockToggle();
-      else if (isArrow) act({ act: 'clockAdj', n: String((e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 0.1 : 1)) });
       else if (isUndo) undo();
       else act(shortcut);
     });
