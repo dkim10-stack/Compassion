@@ -236,7 +236,7 @@ html.mode-control #overlay{display:none}
 .cp-top{flex:none;position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   padding:12px 20px;background:rgba(7,10,18,.88);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--bug-font);font-weight:700;font-size:26px;letter-spacing:2px}
-.brand b{color:#fff;font-weight:700}
+.brand b{color:var(--accent);font-weight:700}
 .brand small{font-family:var(--bug-font);font-weight:700;font-size:11px;letter-spacing:3px;color:#fff;margin-left:6px}
 .brand .dot{width:12px;height:12px;border-radius:0;background:#ff3355}
 .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -265,7 +265,7 @@ html.mode-control #overlay{display:none}
 .btn:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.11)}
 .btn:active{transform:scale(.96)}
 .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.btn.danger{border-color:rgba(255,60,90,.45);color:#fff}
+.btn.danger{border-color:rgba(255,60,90,.45);color:#ff8ea2}
 .btn.ghost{background:transparent}
 .btn.on{background:var(--accent);color:#111;border-color:var(--accent);}
 .btn.sm{padding:6px 10px;font-size:12px;border-radius:0}
@@ -274,7 +274,7 @@ html.mode-control #overlay{display:none}
 .tc-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;min-width:0}
 .tc-head .logo{width:40px;height:40px}
 .tc-head .logo .mono{font-size:13px}
-.tc-abbr{font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:1px;color:#fff;}
+.tc-abbr{font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:1px;color:var(--c);}
 .tc-name{font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:1px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tc-score{font-family:var(--bug-font);font-weight:700;font-size:76px;line-height:1;text-align:center;margin:0 0 8px;}
 .score-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -282,7 +282,7 @@ html.mode-control #overlay{display:none}
   border-color:rgba(var(--c-rgb),.6);background:rgba(var(--c-rgb),.32)}
 .score-btns .btn:hover{background:rgba(var(--c-rgb),.5)}
 .score-btns .btn.three{border-color:var(--accent)}
-.score-btns .btn.minus{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);color:#fff}
+.score-btns .btn.minus{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);color:#ff8ea2}
 .tc-sub{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:10px}
 .foul-box{display:flex;align-items:center;gap:6px;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:0;padding:6px 8px}
 .foul-box span{font-family:var(--bug-font);font-weight:700;font-size:11px;letter-spacing:2px;color:#fff}
@@ -292,11 +292,11 @@ html.mode-control #overlay{display:none}
 
 .clock-ctl{text-align:center;display:flex;flex-direction:column;gap:9px}
 .period-line{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.period-line .pl{white-space:nowrap;font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:2px;color:#fff;}
+.period-line .pl{white-space:nowrap;font-family:var(--bug-font);font-weight:700;font-size:30px;letter-spacing:2px;color:var(--accent);}
 .big-clock{font-family:var(--bug-font);font-weight:700;font-size:76px;line-height:1;letter-spacing:2px;font-variant-numeric:tabular-nums;
   padding:6px 0;border-radius:0;background:rgba(0,0,0,.35);border:1px solid var(--line)}
-.big-clock.running{color:#fff;}
-.big-clock.zero{color:#fff;}
+.big-clock.running{color:#2bff88;}
+.big-clock.zero{color:#ff3355;}
 .clock-btn{font-family:var(--bug-font)!important;font-weight:700;font-size:32px!important;letter-spacing:3px;padding:10px!important;border-radius:0;
   background:#1aa85c!important;border-color:#2bff88!important;color:#fff;}
 .clock-btn.running{background:#d42a48!important;border-color:#ff7088!important;}
@@ -352,7 +352,7 @@ input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .stepper{display:flex;align-items:center;justify-content:center;gap:6px}
 .stepper b{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:22px;min-width:30px;text-align:center}
 .stepper .btn{padding:3px 10px;font-size:15px}
-.th-home{color:#fff}.th-away{color:#fff}
+.th-home{color:var(--home)!important}.th-away{color:var(--away)!important}
 
 .note{font-size:12px;color:#fff;line-height:1.5;margin-top:10px}
 .note code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:0;color:#fff}
@@ -360,7 +360,7 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
 
 .team-cfg{border-left:4px solid var(--c);padding-left:14px;display:flex;flex-direction:column;gap:10px}
 .team-cfg+.team-cfg{margin-top:18px}
-.team-cfg h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:22px;letter-spacing:2px;color:#fff}
+.team-cfg h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:22px;letter-spacing:2px;color:var(--c)}
 .logo-row{display:flex;gap:10px;align-items:flex-end}
 .logo-row .logo{width:44px;height:44px}
 .logo-row .logo .mono{font-size:14px}
@@ -374,14 +374,14 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
 .roster td.ph{width:62px;white-space:nowrap}
 .ph-btn{position:relative;display:inline-grid;place-items:center;width:34px;height:40px;vertical-align:middle;cursor:pointer;
   background:rgba(0,0,0,.35);border:1px dashed rgba(255,255,255,.3);color:#fff;font-size:18px;overflow:hidden}
-.ph-btn:hover{border-color:var(--accent);color:#fff}
+.ph-btn:hover{border-color:var(--accent);color:var(--accent)}
 .ph-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:none}
 .ph-btn.has-img{border-style:solid}
 .ph-btn.has-img img{display:block}
 .ph-btn input{display:none}
 .ph-x{appearance:none;border:0;background:transparent;color:#fff;font-size:16px;cursor:pointer;padding:0 4px;vertical-align:middle;visibility:hidden}
 .ph-btn.has-img+.ph-x{visibility:visible}
-.ph-x:hover{color:#fff}
+.ph-x:hover{color:#ff8ea2}
 /* SETUP tab: text that belongs to a team (headings, labels, typed values) uses that team's color */
 .setup-grid .t-home h4,.setup-grid .t-away h4,
 .setup-grid .t-home label:not(.ph-btn),.setup-grid .t-away label:not(.ph-btn),
@@ -392,7 +392,7 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
   color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:0;padding:6px 10px;margin-right:10px;cursor:pointer}
 .roster .inp{padding:7px 8px}
 .roster-team+.roster-team{margin-top:16px}
-.roster-team h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:20px;letter-spacing:2px;color:#fff;margin-bottom:6px}
+.roster-team h4{font-family:var(--bug-font);font-weight:700;font-weight:700;font-size:20px;letter-spacing:2px;color:var(--c);margin-bottom:6px}
 .toast{position:fixed;right:80px;bottom:20px;z-index:20;background:#111827;border:1px solid var(--accent);color:#fff;padding:12px 16px;border-radius:0;
   font-family:var(--bug-font);font-weight:700;font-size:12px;letter-spacing:1px;transform:translateY(calc(100% + 40px));transition:transform .35s var(--ease-out)}
 .toast.show{transform:none}
