@@ -355,11 +355,6 @@ input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .stepper .btn{padding:3px 10px;font-size:15px}
 .th-home{color:var(--home)!important}.th-away{color:var(--away)!important}
 
-.preview-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:0;overflow:hidden;border:1px solid var(--line);
-  background-color:#1b2030;background-image:linear-gradient(45deg,#242a3c 25%,transparent 25%),linear-gradient(-45deg,#242a3c 25%,transparent 25%),
-  linear-gradient(45deg,transparent 75%,#242a3c 75%),linear-gradient(-45deg,transparent 75%,#242a3c 75%);
-  background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}
-.preview-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
 .note{font-size:12px;color:#8b95ab;line-height:1.5;margin-top:10px}
 .note code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:0;color:#d8deea}
 kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;border-radius:0;background:#e6ebf5;color:#111}
@@ -371,10 +366,6 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
 .logo-row .logo{width:44px;height:44px}
 .logo-row .logo .mono{font-size:14px}
 .logo-row .field{flex:1}
-.font-row{display:flex;gap:10px;align-items:flex-end;margin-top:14px}
-.font-row .field{flex:1}
-.font-status{margin-top:8px;font-size:13px;color:#cfd6e4}
-.font-status b{font-family:var(--bug-font);font-stretch:expanded;font-weight:700;font-size:18px;color:#fff}
 
 .roster{width:100%;border-collapse:collapse}
 .roster th{font-family:var(--bug-font);font-weight:700;font-size:10px;letter-spacing:2px;color:#8b95ab;text-align:left;padding:4px 4px}
@@ -641,37 +632,17 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       <div class="roster-team t-away"><h4>AWAY LINEUP</h4><table class="roster" id="rosterAway"></table></div>
     </section>
 
-    <!-- PRE-GAME CONFIGURATION: BROADCAST / RULES -->
+    <!-- PRE-GAME CONFIGURATION: BROADCAST -->
     <section class="card">
-      <h3>PRE-GAME CONFIG · BROADCAST &amp; RULES</h3>
-      <div class="grid2">
-        <div class="field" style="grid-column:1/-1"><label>LABEL UNDER SCOREBOARD (LEAVE EMPTY TO HIDE)</label><input class="inp" maxlength="40" data-bind="settings.label"></div>
-        <div class="field"><label>BROADCAST ACCENT COLOR</label><input type="color" class="inp" data-bind="accent"></div>
-        <div class="field"><label>PERIODS IN REGULATION</label><input type="number" class="inp" min="1" max="8" data-bind="settings.periods" data-type="int"></div>
-        <div class="field"><label>PERIOD LENGTH (MIN)</label><input type="number" class="inp" min="1" max="60" step="0.5" data-bind="settings.periodMin" data-type="num"></div>
-        <div class="field"><label>OVERTIME LENGTH (MIN)</label><input type="number" class="inp" min="1" max="20" step="0.5" data-bind="settings.otMin" data-type="num"></div>
-        <div class="field"><label>BONUS AT TEAM FOUL #</label><input type="number" class="inp" min="1" max="20" data-bind="settings.bonusAt" data-type="int"></div>
-      </div>
-      <div class="font-row">
-        <div class="field"><label>SCOREBOARD FONT FILE (.OTF / .TTF / .WOFF)</label><input type="file" class="inp" accept=".otf,.ttf,.woff,.woff2,font/*" id="fontInput"></div>
-        <button class="btn sm ghost" data-act="clearFont">CLEAR</button>
-      </div>
-      <div class="font-status" id="fontStatus"></div>
+      <h3>PRE-GAME CONFIG · BROADCAST</h3>
+      <div class="field"><label>LABEL UNDER SCOREBOARD (LEAVE EMPTY TO HIDE)</label><input class="inp" maxlength="40" data-bind="settings.label"></div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
         <label class="check"><input type="checkbox" data-bind="settings.resetFouls" data-type="bool"> Reset team fouls when advancing period</label>
         <label class="check"><input type="checkbox" data-bind="settings.ftAuto" data-type="bool"> +1 logs a made free throw (FTM + FTA)</label>
-        <label class="check"><input type="checkbox" data-bind="settings.preview" data-type="bool"> Show live program preview in this panel</label>
       </div>
       <p class="note">+3 automatically logs a 3-pointer; with the setting on, +1 logs a made free throw. <b>FT MISS</b> logs a missed attempt.</p>
-      <p class="note">Rules default to NFHS: four 8:00 quarters, 4:00 overtime, bonus on the 5th team foul of each quarter. Changing period length applies the next time you press <b>FULL PERIOD</b> or <b>NEXT PERIOD</b>.</p>
+      <p class="note">Game rules are fixed to NFHS: four 8:00 quarters, 4:00 overtime, bonus on the 5th team foul.</p>
       <p class="note"><b>OBS setup:</b> overlay = this file as a Browser source (1920×1080). Control panel = a second Browser source of this file in an off-air scene, with <code>:root{--yisspn-mode:control}</code> in its Custom CSS; right-click it → <b>Interact</b> to operate.</p>
-    </section>
-
-    <!-- PREVIEW -->
-    <section class="card" id="previewCard">
-      <h3>PROGRAM PREVIEW <span class="tag">LIVE OVERLAY</span></h3>
-      <div class="preview-wrap"><iframe id="previewFrame" title="Overlay preview"></iframe></div>
-      <p class="note">Checkerboard = transparent. Hidden automatically when running inside OBS (use the OBS preview there).</p>
     </section>
   </main>
   </div>
@@ -741,7 +712,7 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       show: { bug: true, lineup: null, stats: false },
       flash: { id: 0, team: 'home' },
       pop: { id: 0, key: null, secs: 5 },
-      settings: { label: 'KAIAC Conference', periods: 4, periodMin: 8, otMin: 4, bonusAt: 5, resetFouls: true, ftAuto: true, preview: true }
+      settings: { label: 'KAIAC Conference', periods: 4, periodMin: 8, otMin: 4, bonusAt: 5, resetFouls: true, ftAuto: true }
     };
   }
 
@@ -772,6 +743,10 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
   function parseState(raw) {
     var s = defaultState();
     if (raw) { try { merge(s, JSON.parse(raw)); } catch (e) {} }
+    // Accent color and game rules are fixed defaults (no longer editable).
+    var d = defaultState();
+    s.accent = d.accent;
+    ['periods', 'periodMin', 'otMin', 'bonusAt'].forEach(function (k) { s.settings[k] = d.settings[k]; });
     return normalize(s);
   }
   function photoKey(team, i) { return 'hoopscast.photo.' + team + '.' + i; }
@@ -1317,38 +1292,15 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       else v = el.value;
       setPath(state, path, v);
       save();
-      if (path === 'settings.preview') setupPreview();
     });
     root.addEventListener('change', function (e) {
       var el = e.target;
       var team = el.getAttribute && el.getAttribute('data-logo-input');
       if (team && el.files && el.files[0]) loadLogo(team, el.files[0], el);
-      if (el.id === 'fontInput' && el.files && el.files[0]) loadFont(el.files[0], el);
       var ph = el.getAttribute && el.getAttribute('data-photo');
       if (ph && el.files && el.files[0]) loadPhoto(ph.split('.')[0], +ph.split('.')[1], el.files[0], el);
     });
 
-    function updateFontStatus() {
-      var name = '';
-      try { name = localStorage.getItem(FONT_NAME_KEY) || ''; } catch (e) {}
-      var st = $('fontStatus');
-      if (name) { st.innerHTML = 'Loaded: <span></span> &nbsp; <b>CEN 54 · 2ND 7:42</b>'; st.querySelector('span').textContent = name; }
-      else st.innerHTML = 'No file loaded. Using Helvetica Extended if it is installed on this computer, otherwise Helvetica/Arial. Sample: <b>CEN 54 · 2ND 7:42</b>';
-    }
-    function loadFont(file, inputEl) {
-      if (file.size > 1500000) { toast('Font file is too large (max 1.5 MB).'); inputEl.value = ''; return; }
-      var reader = new FileReader();
-      reader.onload = function () {
-        try {
-          localStorage.setItem(FONT_KEY, reader.result);
-          localStorage.setItem(FONT_NAME_KEY, file.name);
-          applyFont(); updateFontStatus();
-          toast('Scoreboard font loaded.');
-        } catch (err) { toast('Font too large for LocalStorage. Try a .woff2 version.'); }
-        inputEl.value = '';
-      };
-      reader.readAsDataURL(file);
-    }
     function renderPhotos() {
       root.querySelectorAll('[data-ph]').forEach(function (lb) {
         var k = lb.getAttribute('data-ph').split('.'), src = readPhoto(k[0], +k[1]), img = lb.querySelector('img');
@@ -1499,10 +1451,6 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
           try { localStorage.removeItem(photoKey(t, parseInt(d.n, 10))); } catch (e) {}
           renderPhotos(); toast('Photo removed.');
           return;
-        case 'clearFont':
-          try { localStorage.removeItem(FONT_KEY); localStorage.removeItem(FONT_NAME_KEY); } catch (e) {}
-          applyFont(); updateFontStatus(); toast('Scoreboard font cleared.');
-          return;
         case 'openOverlay':
           window.open(location.href.replace(/#.*$/, '') + '#overlay', 'yisspn_overlay', 'width=1280,height=720');
           return;
@@ -1544,18 +1492,6 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     });
 
     // ---- Render ----
-    var lastShownSettingsPreview = null;
-    function setupPreview() {
-      var on = !!state.settings.preview && !window.obsstudio;
-      if (on === lastShownSettingsPreview) return;
-      lastShownSettingsPreview = on;
-      var fr = $('previewFrame');
-      var card = $('previewCard');
-      card.style.display = on ? '' : 'none';
-      if (on) fr.src = location.href.replace(/#.*$/, '') + '#overlay';
-      else fr.removeAttribute('src');
-    }
-
     function render() {
       queueFit();
       applyTheme(state);
@@ -1605,10 +1541,8 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     // First save writes defaults so the overlay has data even before any button is pressed.
     if (!readRaw()) { try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch (e) {} }
     populateInputs(true);
-    updateFontStatus();
     renderPhotos();
     render();
-    setupPreview();
     clockLoop();
   }
 })();
