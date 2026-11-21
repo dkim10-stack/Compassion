@@ -1506,16 +1506,28 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
     // (without the browser's "repeat" flag, sometimes as release+press pairs), so track held keys ourselves:
     // a key counts again only after it has been released, and a release followed almost instantly by a
     // press is treated as the same hold.
+    // Arrow keys are tracked by name because OBS on macOS may report a different key code when they are released.
+    // If no release is ever seen for a key, only rapid auto-repeat (presses < 150 ms apart) is treated as a hold.
     var keyState = {};
+    function keyId(e) { return /^Arrow/.test(e.key) ? e.key : (e.code || e.key); }
     function isHeldRepeat(e) {
-      var now = Date.now(), k = keyState[e.code] || (keyState[e.code] = { down: false, last: 0, up: 0 });
-      var repeat = e.repeat || (k.down && now - k.last < 1000) || (now - k.up < 40);
+      var now = Date.now(), id = keyId(e);
+      var k = keyState[id] || (keyState[id] = { down: false, last: 0, up: 0, sawUp: false });
+      var repeat;
+      if (e.repeat) repeat = true;
+      else if (k.sawUp) repeat = (k.down && now - k.last < 1000) || (now - k.up < 40);
+      else repeat = k.down && now - k.last < 150;
       k.down = true; k.last = now;
       return repeat;
     }
     document.addEventListener('keyup', function (e) {
-      var k = keyState[e.code];
-      if (k) { k.down = false; k.up = Date.now(); }
+      var now = Date.now(), ids = [keyId(e), e.code, e.key];
+      // A release that cannot be identified (or any arrow release) frees all arrow keys.
+      if (!e.code || /^Arrow/.test(e.code) || /^Arrow/.test(e.key)) ids = ids.concat(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
+      ids.forEach(function (id) {
+        var k = id && keyState[id];
+        if (k) { k.down = false; k.up = now; k.sawUp = true; }
+      });
     });
     window.addEventListener('blur', function () { keyState = {}; });
 
