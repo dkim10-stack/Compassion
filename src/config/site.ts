@@ -20,11 +20,19 @@ export const site = {
   logo: '/logo.png' as string | null,
 
   /** Contact email shown in the footer. */
-  email: 'hello@example.org',
+  email: 'compassionreview@gmail.com',
+
+  /** Instagram username shown in the footer (without the @). */
+  instagram: 'compassion_review',
+
+  /** Link for the "Join as a Member Now!" section on the home page. */
+  memberFormUrl:
+    'https://docs.google.com/forms/d/e/1FAIpQLSdPU5H0ZSjeFHLw9BMSc-wPtvFXCz5kFngqcgIwNMFCrH1C5Q/viewform?usp=sharing&ouid=104648732044560223408',
 };
 
 export const nav = [
   { label: 'Home', href: '/' },
+  { label: 'About Us', href: '/about' },
   { label: 'Articles', href: '/articles' },
   { label: 'Donate', href: '/donate' },
 ];

@@ -4,18 +4,21 @@
 :root {
   --color-bg: #f8fbfe;
   --color-surface: #ffffff;
-  --color-alt: #eef6fd;
+  --color-alt: #e4f0fb;
   --color-ink: #12294a;
   --color-text: #3a4a60;
   --color-muted: #66768c;
   --color-brand: #0060b9; /* logo blue */
   --color-brand-dark: #004e96;
-  --color-sky: #5ab4ec;
-  --color-sky-soft: #d9ecfa;
-  --color-border: #dce8f3;
+  --color-hero: #1c6cc4; /* solid hero blue, a touch lighter than the logo */
+  --color-sky: #2b8be0;
+  --color-sky-light: #8fc9f5;
+  --color-sky-soft: #d3e7f9;
+  --color-border: #cfe1f2;
 
-  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-title: 'DM Serif Display', Georgia, 'Times New Roman', serif; /* organization name */
+  /* Headings: Arial (Arimo is loaded as an Arial look-alike for devices without Arial) */
+  --font-display: Arial, 'Arimo', 'Helvetica Neue', Helvetica, sans-serif;
+  --font-title: var(--font-display); /* organization name */
   --font-motto: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; /* motto (italic) */
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -65,7 +68,7 @@ h3 {
   color: var(--color-ink);
   line-height: 1.15;
   margin: 0 0 0.5em;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 p {
@@ -128,7 +131,7 @@ a {
 }
 
 .section-title {
-  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.4rem);
 }
 
 .section-title em {
@@ -237,9 +240,8 @@ a {
 
 .brand-name {
   font-family: var(--font-title);
-  font-size: 1.5rem;
-  font-weight: 400; /* DM Serif Display's only weight — already bold */
-  letter-spacing: 0.01em;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .site-nav ul {
@@ -296,16 +298,10 @@ a {
 
 /* ── Hero ──────────────────────────────────────────────────── */
 .hero {
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse at 15% 0%, rgb(90 180 236 / 0.22), transparent 55%),
-    radial-gradient(ellipse at 90% 100%, rgb(0 96 185 / 0.1), transparent 50%),
-    linear-gradient(180deg, #f2f8fe, var(--color-bg));
-  color: var(--color-ink);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--color-hero);
+  color: #fff;
   text-align: center;
-  padding: 6rem 0 6.5rem;
+  padding: 5rem 0 5.5rem;
 }
 
 .hero-inner {
@@ -336,23 +332,25 @@ a {
   width: 140px;
   height: 140px;
   object-fit: contain;
+  border-radius: 50%;
+  border: 4px solid #fff;
   margin-bottom: 2rem;
 }
 
 .hero-title {
   font-family: var(--font-title);
-  color: var(--color-ink);
-  font-size: clamp(3.25rem, 11vw, 7rem);
-  font-weight: 400; /* DM Serif Display's only weight — already bold */
+  color: #fff;
+  font-size: clamp(2.5rem, 7.5vw, 5rem);
+  font-weight: 700;
   letter-spacing: -0.01em;
-  line-height: 1;
+  line-height: 1.05;
   margin-bottom: 1.5rem;
 }
 
 .hero-divider {
   width: 64px;
-  height: 2px;
-  background: var(--color-sky);
+  height: 3px;
+  background: var(--color-sky-light);
   margin-bottom: 1.5rem;
 }
 
@@ -360,7 +358,7 @@ a {
   font-family: var(--font-motto);
   font-style: italic;
   font-size: clamp(1.2rem, 2.8vw, 1.65rem);
-  color: var(--color-muted);
+  color: rgb(255 255 255 / 0.92);
   line-height: 1.4;
   max-width: 34ch;
   margin-bottom: 2.5rem;
@@ -373,47 +371,44 @@ a {
   gap: 0.75rem;
 }
 
-/* ── Daily quote ───────────────────────────────────────────── */
-.quote-section {
+/* Buttons on the blue hero */
+.hero .btn-primary {
+  background: #fff;
+  color: var(--color-brand);
+}
+.hero .btn-primary:hover {
+  background: var(--color-sky-soft);
+}
+.hero .btn-ghost {
+  border-color: #fff;
+  color: #fff;
+}
+.hero .btn-ghost:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+/* ── Join as a member ─────────────────────────────────────── */
+.join-section {
   text-align: center;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
+  padding: 4rem 0;
 }
 
-.quote {
-  position: relative;
-  margin: 0;
-}
-
-.quote-mark {
-  display: block;
+.join-link {
   font-family: var(--font-display);
-  font-size: 6rem;
-  line-height: 0.6;
-  color: var(--color-sky);
-  height: 2.5rem;
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.2em;
+  transition: color 0.2s;
 }
 
-.quote blockquote {
-  margin: 0;
-}
-
-.quote blockquote p {
-  font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-  font-weight: 500;
-  font-style: italic;
-  line-height: 1.35;
-  color: var(--color-ink);
-  margin-bottom: 1.25rem;
-}
-
-.quote figcaption {
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+.join-link:hover {
+  color: var(--color-brand-dark);
 }
 
 /* ── Who we are ────────────────────────────────────────────── */
@@ -425,7 +420,7 @@ a {
 }
 
 .about-heading .section-title {
-  font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+  font-size: clamp(1.9rem, 4vw, 2.75rem);
 }
 
 .about-body {
@@ -441,7 +436,7 @@ a {
 }
 
 .page-title {
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
   font-weight: 700;
 }
 
@@ -487,7 +482,7 @@ a {
 }
 
 .article-title {
-  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  font-size: clamp(1.3rem, 2.6vw, 1.65rem);
   margin-bottom: 0.5rem;
 }
 
@@ -521,13 +516,13 @@ a {
 }
 
 .prose h2 {
-  font-size: 2.25rem;
+  font-size: 1.6rem;
   font-weight: 700;
   margin-top: 2.5rem;
 }
 
 .prose h3 {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin-top: 2rem;
 }
 
@@ -547,7 +542,7 @@ a {
   border-left: 3px solid var(--color-sky);
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: var(--color-ink);
 }
 
@@ -588,7 +583,7 @@ a {
   flex-shrink: 0;
   min-width: 4.5rem;
   font-family: var(--font-display);
-  font-size: 2.25rem;
+  font-size: 1.9rem;
   font-weight: 700;
   color: var(--color-brand);
   line-height: 1;
@@ -634,12 +629,12 @@ a {
   background: var(--color-brand);
   color: #fff;
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
 .step h3 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   margin: 0.4rem 0 0.35rem;
 }
 
@@ -648,68 +643,112 @@ a {
   color: var(--color-text);
 }
 
-/* ── Footer ────────────────────────────────────────────────── */
+/* ── About Us ──────────────────────────────────────────────── */
+.about-statement {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-ink);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.leaders-title {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.leaders {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5rem 2rem;
+}
+
+.leader {
+  text-align: center;
+}
+
+.leader-photo {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center 25%;
+  border-radius: var(--radius);
+  background: var(--color-alt);
+  margin-bottom: 1.1rem;
+}
+
+.leader-photo-empty {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+}
+
+.leader-photo-empty span {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-brand);
+}
+
+.leader-name {
+  font-size: 1.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.leader-role {
+  margin: 0;
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+/* ── Footer (contact) ──────────────────────────────────────── */
 .site-footer {
   background: var(--color-ink);
-  color: rgb(255 255 255 / 0.75);
-  padding: 3.5rem 0 1.5rem;
-  font-size: 0.95rem;
-}
-
-.footer-inner {
-  display: flex;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid rgb(255 255 255 / 0.12);
-}
-
-.footer-name {
-  font-family: var(--font-title);
-  font-size: 1.75rem;
-  font-weight: 400;
   color: #fff;
-  margin-bottom: 0.25rem;
+  padding: 3.5rem 0 4rem;
 }
 
-.footer-motto {
-  font-family: var(--font-motto);
-  font-style: italic;
-  font-size: 1rem;
-  margin: 0;
+.footer-title {
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  margin-bottom: 1.5rem;
 }
 
-.footer-links {
+.footer-contacts {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  gap: 1.5rem;
-}
-
-.footer-links a,
-.footer-bottom a {
-  color: rgb(255 255 255 / 0.75);
-  text-decoration: none;
-}
-
-.footer-links a:hover,
-.footer-bottom a:hover {
-  color: var(--color-sky);
-}
-
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-top: 1.5rem;
-  font-size: 0.85rem;
+  gap: 1.25rem 3rem;
 }
 
-.footer-bottom p {
-  margin: 0;
+.footer-contacts a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #fff;
+  text-decoration: none;
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  transition: color 0.2s;
+}
+
+.footer-contacts a:hover {
+  color: var(--color-sky-light);
+}
+
+.footer-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
@@ -718,6 +757,10 @@ a {
   .why-grid {
     grid-template-columns: 1fr;
     gap: 2.5rem;
+  }
+
+  .leaders {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -796,8 +839,9 @@ a {
     transform: translateY(-7px) rotate(-45deg);
   }
 
-  .footer-inner {
-    flex-direction: column;
+  .leaders {
+    grid-template-columns: 1fr;
+    max-width: 320px;
   }
 }
 

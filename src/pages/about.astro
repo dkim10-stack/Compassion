@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+// To edit the leaders, change src/data/leaders.json
+// (photos go in public/leaders/; use null for no photo yet)
+import leaders from '../data/leaders.json';
+
+const initials = (name: string) =>
+  name
+    .split(' ')
+    .map((part) => part[0])
+    .filter((_, i, all) => i === 0 || i === all.length - 1)
+    .join('');
+---
+
+<BaseLayout title="About Us" description="Meet the leaders of Compassion Review.">
+  <section class="page-header">
+    <div class="container narrow">
+      <h1 class="eyebrow">About Us</h1>
+      <p class="about-statement">
+        With leaders of 8+ years of involvement in Compassion, we seek to use our experience to
+        serve those around us.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-tight" aria-labelledby="leaders-heading">
+    <div class="container">
+      <h2 id="leaders-heading" class="section-title leaders-title">Our Leaders</h2>
+      <ul class="leaders">
+        {
+          leaders.map((leader) => (
+            <li class="leader">
+              {leader.photo ? (
+                <img src={leader.photo} alt={leader.name} class="leader-photo" loading="lazy" />
+              ) : (
+                <div class="leader-photo leader-photo-empty" role="img" aria-label={`${leader.name} (photo coming soon)`}>
+                  <span>{initials(leader.name)}</span>
+                </div>
+              )}
+              <h3 class="leader-name">{leader.name}</h3>
+              <p class="leader-role">{leader.role}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

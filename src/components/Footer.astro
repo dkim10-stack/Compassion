@@ -1,23 +1,30 @@
 ---
-import { site, nav } from '../config/site';
-
-const year = new Date().getFullYear();
+import { site } from '../config/site';
 ---
 
 <footer class="site-footer">
   <div class="container footer-inner">
-    <div>
-      <p class="footer-name">{site.name}</p>
-      <p class="footer-motto">{site.motto}</p>
-    </div>
-    <nav aria-label="Footer">
-      <ul class="footer-links">
-        {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
-      </ul>
-    </nav>
-  </div>
-  <div class="container footer-bottom">
-    <p>© {year} {site.name}</p>
-    <a href={`mailto:${site.email}`}>{site.email}</a>
+    <h2 class="footer-title">Contact Us</h2>
+    <ul class="footer-contacts">
+      <li>
+        <a href={`mailto:${site.email}`}>
+          <svg class="footer-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+            <path d="M3.5 6.5l8.5 6.5 8.5-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <span>{site.email}</span>
+        </a>
+      </li>
+      <li>
+        <a href={`https://www.instagram.com/${site.instagram}/`} target="_blank" rel="noopener noreferrer">
+          <svg class="footer-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+            <circle cx="12" cy="12" r="4.3" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+            <circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"></circle>
+          </svg>
+          <span>@{site.instagram}</span>
+        </a>
+      </li>
+    </ul>
   </div>
 </footer>

@@ -21,23 +21,25 @@ The `dist/` folder is plain HTML/CSS and can be hosted anywhere (Netlify, Vercel
 ├── package.json
 ├── tsconfig.json
 ├── public/
-│   └── logo.png                Logo (also used as the browser-tab icon)
+│   ├── logo.png                Logo (also used as the browser-tab icon)
+│   └── leaders/                Leader photos
 └── src/
-    ├── config/site.ts          ✏️ Name, motto, logo, email, nav links
+    ├── config/site.ts          ✏️ Name, motto, logo, email, Instagram, member form link, nav links
     ├── data/
-    │   ├── daily-quote.json    ✏️ Today's quote
+    │   ├── leaders.json        ✏️ "Our Leaders" on the About Us page
     │   └── donation-steps.json ✏️ "How to Donate" steps
     ├── content/articles/       ✏️ One Markdown file per article
     ├── content.config.ts       Article fields (title, date, author, summary)
     ├── layouts/BaseLayout.astro  Shared <head>, header, footer
     ├── components/
     │   ├── Header.astro        Top navigation (with mobile menu)
-    │   ├── Footer.astro
+    │   ├── Footer.astro        Contact Us (email + Instagram)
     │   ├── Hero.astro          Logo, name, motto
-    │   ├── DailyQuote.astro
+    │   ├── JoinMember.astro    "Join as a Member Now!" link
     │   └── ArticleCard.astro
     ├── pages/
     │   ├── index.astro         Home (also: "Who we are" text)
+    │   ├── about.astro         About Us (statement + Our Leaders)
     │   ├── articles/index.astro    Article list
     │   ├── articles/[slug].astro   Full article page
     │   └── donate.astro        Donate (also: "Why donate" text)
@@ -47,14 +49,9 @@ The `dist/` folder is plain HTML/CSS and can be hosted anywhere (Netlify, Vercel
 
 ## Common edits
 
-**Change the Daily Message of Hope** — edit `src/data/daily-quote.json`:
+**Change the member sign-up link** — edit `memberFormUrl` in `src/config/site.ts`.
 
-```json
-{
-  "text": "Your quote here.",
-  "author": "Who said it"
-}
-```
+**Edit the leaders** — edit `src/data/leaders.json`. Put photos in `public/leaders/` and set `"photo": "/leaders/file-name.jpg"`; use `null` to show initials until a photo is ready.
 
 **Add an article** — create `src/content/articles/my-new-post.md`. It appears at `/articles/my-new-post`, newest first.
 
@@ -73,6 +70,6 @@ Write the article here using Markdown.
 
 **Add your logo** — put the image in `public/` (e.g. `public/logo.png`) and set `logo: '/logo.png'` in `src/config/site.ts`.
 
-**Change name / motto** — `src/config/site.ts`.
+**Change name / motto / email / Instagram** — `src/config/site.ts`.
 
 **Change colors or fonts** — the variables at the top of `src/styles/global.css`.
