@@ -311,11 +311,9 @@ html.mode-control #overlay{display:none}
 .inp{width:100%;min-width:0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);border-radius:0;padding:9px 10px;color:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
 .inp:focus{border-color:var(--accent);outline:1px solid var(--accent);}
 .inp.big{font-family:var(--bug-font);font-weight:700;font-size:24px;text-align:center;letter-spacing:2px;padding:6px 10px}
-.rgb-row{display:flex;align-items:center;gap:8px}
-.rgb-swatch{flex:none;width:40px;height:38px;background:var(--c);border:1px solid rgba(255,255,255,.3)}
-.rgb-ch{flex:1;display:flex;align-items:center;gap:6px;min-width:0}
-.rgb-ch span{font-family:var(--bug-font);font-weight:700;font-size:12px;color:#fff}
-.rgb-ch .inp{text-align:center}
+.hex-row{display:flex;align-items:center;gap:8px}
+.hex-swatch{flex:none;width:40px;height:38px;background:var(--c);border:1px solid rgba(255,255,255,.3)}
+.hex-row .inp{text-transform:uppercase;letter-spacing:1px}
 input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -605,12 +603,10 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
         <h4>HOME TEAM</h4>
         <div class="field"><label>SCHOOL / TEAM NAME</label><input class="inp" data-bind="home.name" maxlength="32"></div>
         <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="home.abbr" data-type="upper" maxlength="4"></div>
-        <div class="field"><label>TEAM COLOR (RGB, 0–255)</label>
-          <div class="rgb-row" data-rgb="home">
-            <span class="rgb-swatch"></span>
-            <label class="rgb-ch"><span>R</span><input class="inp" data-ch="0" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Home color red"></label>
-            <label class="rgb-ch"><span>G</span><input class="inp" data-ch="1" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Home color green"></label>
-            <label class="rgb-ch"><span>B</span><input class="inp" data-ch="2" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Home color blue"></label>
+        <div class="field"><label>TEAM COLOR (HEX CODE)</label>
+          <div class="hex-row">
+            <span class="hex-swatch"></span>
+            <input class="inp" data-hex="home" maxlength="7" autocomplete="off" spellcheck="false" placeholder="#1E6BFF" aria-label="Home team color hex code">
           </div>
         </div>
         <div class="logo-row">
@@ -624,12 +620,10 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
         <h4>AWAY TEAM</h4>
         <div class="field"><label>SCHOOL / TEAM NAME</label><input class="inp" data-bind="away.name" maxlength="32"></div>
         <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="away.abbr" data-type="upper" maxlength="4"></div>
-        <div class="field"><label>TEAM COLOR (RGB, 0–255)</label>
-          <div class="rgb-row" data-rgb="away">
-            <span class="rgb-swatch"></span>
-            <label class="rgb-ch"><span>R</span><input class="inp" data-ch="0" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Away color red"></label>
-            <label class="rgb-ch"><span>G</span><input class="inp" data-ch="1" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Away color green"></label>
-            <label class="rgb-ch"><span>B</span><input class="inp" data-ch="2" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Away color blue"></label>
+        <div class="field"><label>TEAM COLOR (HEX CODE)</label>
+          <div class="hex-row">
+            <span class="hex-swatch"></span>
+            <input class="inp" data-hex="away" maxlength="7" autocomplete="off" spellcheck="false" placeholder="#1E6BFF" aria-label="Away team color hex code">
           </div>
         </div>
         <div class="logo-row">
@@ -1284,31 +1278,37 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
         if (el.type === 'checkbox') el.checked = !!v;
         else if (el.value !== String(v == null ? '' : v)) el.value = v == null ? '' : v;
       });
-      root.querySelectorAll('[data-rgb]').forEach(function (row) {
-        var rgb = hexToRgb(state[row.getAttribute('data-rgb')].color);
-        row.querySelectorAll('[data-ch]').forEach(function (el) {
-          if (!force && el === document.activeElement) return;
-          el.value = rgb[+el.getAttribute('data-ch')];
-        });
+      root.querySelectorAll('[data-hex]').forEach(function (el) {
+        if (!force && el === document.activeElement) return;
+        el.value = state[el.getAttribute('data-hex')].color.toUpperCase();
       });
     }
-    // Team colors are typed as R, G, B numbers (0-255); OBS cannot open the browser's color picker.
-    function rgbHex(rgb) { return '#' + rgb.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join(''); }
+    // Team colors are typed as hex codes (#RRGGBB or #RGB); OBS cannot open the browser's color picker.
+    function parseHex(v) {
+      var h = v.replace(/^#/, '');
+      if (/^[0-9a-f]{3}$/i.test(h)) h = h.replace(/./g, '$&$&');
+      return /^[0-9a-f]{6}$/i.test(h) ? '#' + h.toLowerCase() : null;
+    }
     root.addEventListener('input', function (e) {
-      var row = e.target.closest && e.target.closest('[data-rgb]');
-      if (!row) return;
-      var el = e.target, digits = el.value.replace(/[^0-9]/g, '');
-      if (digits !== el.value) el.value = digits;
-      var vals = [].map.call(row.querySelectorAll('[data-ch]'), function (x) { return x.value === '' ? NaN : Math.min(255, parseInt(x.value, 10)); });
-      if (vals.some(isNaN)) return; // wait until all three boxes have a number
-      state[row.getAttribute('data-rgb')].color = rgbHex(vals);
+      var el = e.target, team = el.getAttribute && el.getAttribute('data-hex');
+      if (!team) return;
+      var clean = el.value.replace(/[^#0-9a-f]/gi, '').replace(/(?!^)#/g, '');
+      if (clean !== el.value) el.value = clean;
+      var hex = clean.replace(/^#/, '').length === 6 && parseHex(clean); // update once all 6 digits are typed
+      if (!hex) return;
+      state[team].color = hex;
       save();
     });
     root.addEventListener('focusout', function (e) {
-      if (e.target.closest && e.target.closest('[data-rgb]')) populateInputs(false); // tidy values like 300 -> 255
+      var el = e.target, team = el.getAttribute && el.getAttribute('data-hex');
+      if (!team) return;
+      var hex = parseHex(el.value);  // also accepts the 3-digit short form, e.g. #FFF
+      if (hex && hex !== state[team].color) { state[team].color = hex; save(); }
+      else if (!hex && el.value.replace(/^#/, '') !== '') toast('Use a 6-digit hex code like #1E6BFF.');
+      populateInputs(false);  // show the saved color (restores it if the entry was invalid)
     });
     root.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && e.target.closest && e.target.closest('[data-rgb]')) e.target.blur();
+      if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('data-hex')) e.target.blur();
     });
     root.addEventListener('input', function (e) {
       var el = e.target;
