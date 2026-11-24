@@ -311,7 +311,11 @@ html.mode-control #overlay{display:none}
 .inp{width:100%;min-width:0;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);border-radius:0;padding:9px 10px;color:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
 .inp:focus{border-color:var(--accent);outline:1px solid var(--accent);}
 .inp.big{font-family:var(--bug-font);font-weight:700;font-size:24px;text-align:center;letter-spacing:2px;padding:6px 10px}
-input[type=color].inp{padding:3px;height:40px;cursor:pointer}
+.rgb-row{display:flex;align-items:center;gap:8px}
+.rgb-swatch{flex:none;width:40px;height:38px;background:var(--c);border:1px solid rgba(255,255,255,.3)}
+.rgb-ch{flex:1;display:flex;align-items:center;gap:6px;min-width:0}
+.rgb-ch span{font-family:var(--bug-font);font-weight:700;font-size:12px;color:#fff}
+.rgb-ch .inp{text-align:center}
 input[type=file].inp{padding:7px;font-size:12px;cursor:pointer}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -600,9 +604,14 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       <div class="team-cfg t-home">
         <h4>HOME TEAM</h4>
         <div class="field"><label>SCHOOL / TEAM NAME</label><input class="inp" data-bind="home.name" maxlength="32"></div>
-        <div class="grid2">
-          <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="home.abbr" data-type="upper" maxlength="4"></div>
-          <div class="field"><label>TEAM COLOR</label><input type="color" class="inp" data-bind="home.color"></div>
+        <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="home.abbr" data-type="upper" maxlength="4"></div>
+        <div class="field"><label>TEAM COLOR (RGB, 0–255)</label>
+          <div class="rgb-row" data-rgb="home">
+            <span class="rgb-swatch"></span>
+            <label class="rgb-ch"><span>R</span><input class="inp" data-ch="0" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Home color red"></label>
+            <label class="rgb-ch"><span>G</span><input class="inp" data-ch="1" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Home color green"></label>
+            <label class="rgb-ch"><span>B</span><input class="inp" data-ch="2" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Home color blue"></label>
+          </div>
         </div>
         <div class="logo-row">
           <div class="logo" data-logo-for="home"><img alt=""><span class="mono"></span></div>
@@ -614,9 +623,14 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
       <div class="team-cfg t-away">
         <h4>AWAY TEAM</h4>
         <div class="field"><label>SCHOOL / TEAM NAME</label><input class="inp" data-bind="away.name" maxlength="32"></div>
-        <div class="grid2">
-          <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="away.abbr" data-type="upper" maxlength="4"></div>
-          <div class="field"><label>TEAM COLOR</label><input type="color" class="inp" data-bind="away.color"></div>
+        <div class="field"><label>ABBREVIATION</label><input class="inp" data-bind="away.abbr" data-type="upper" maxlength="4"></div>
+        <div class="field"><label>TEAM COLOR (RGB, 0–255)</label>
+          <div class="rgb-row" data-rgb="away">
+            <span class="rgb-swatch"></span>
+            <label class="rgb-ch"><span>R</span><input class="inp" data-ch="0" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Away color red"></label>
+            <label class="rgb-ch"><span>G</span><input class="inp" data-ch="1" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Away color green"></label>
+            <label class="rgb-ch"><span>B</span><input class="inp" data-ch="2" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Away color blue"></label>
+          </div>
         </div>
         <div class="logo-row">
           <div class="logo" data-logo-for="away"><img alt=""><span class="mono"></span></div>
@@ -1270,7 +1284,32 @@ kbd{font-family:var(--bug-font);font-weight:700;font-size:11px;padding:2px 7px;b
         if (el.type === 'checkbox') el.checked = !!v;
         else if (el.value !== String(v == null ? '' : v)) el.value = v == null ? '' : v;
       });
+      root.querySelectorAll('[data-rgb]').forEach(function (row) {
+        var rgb = hexToRgb(state[row.getAttribute('data-rgb')].color);
+        row.querySelectorAll('[data-ch]').forEach(function (el) {
+          if (!force && el === document.activeElement) return;
+          el.value = rgb[+el.getAttribute('data-ch')];
+        });
+      });
     }
+    // Team colors are typed as R, G, B numbers (0-255); OBS cannot open the browser's color picker.
+    function rgbHex(rgb) { return '#' + rgb.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join(''); }
+    root.addEventListener('input', function (e) {
+      var row = e.target.closest && e.target.closest('[data-rgb]');
+      if (!row) return;
+      var el = e.target, digits = el.value.replace(/[^0-9]/g, '');
+      if (digits !== el.value) el.value = digits;
+      var vals = [].map.call(row.querySelectorAll('[data-ch]'), function (x) { return x.value === '' ? NaN : Math.min(255, parseInt(x.value, 10)); });
+      if (vals.some(isNaN)) return; // wait until all three boxes have a number
+      state[row.getAttribute('data-rgb')].color = rgbHex(vals);
+      save();
+    });
+    root.addEventListener('focusout', function (e) {
+      if (e.target.closest && e.target.closest('[data-rgb]')) populateInputs(false); // tidy values like 300 -> 255
+    });
+    root.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target.closest && e.target.closest('[data-rgb]')) e.target.blur();
+    });
     root.addEventListener('input', function (e) {
       var el = e.target;
       var path = el.getAttribute && el.getAttribute('data-bind');
